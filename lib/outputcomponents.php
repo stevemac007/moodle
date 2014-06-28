@@ -1102,6 +1102,22 @@ class html_writer {
     }
 
     /**
+     * Generates a simple image tag with attributes.
+     *
+     * @param string $src The source of image
+     * @param string $alt The alternate text for image
+     * @param array $attributes The tag attributes (array('height' => $max_height, 'class' => 'class1') etc.)
+     * @return string HTML fragment
+     */
+    public static function img($src, $alt, array $attributes = null) {
+        $attributes = (array)$attributes;
+        $attributes['src'] = $src;
+        $attributes['alt'] = $alt;
+
+        return self::empty_tag('img', $attributes);
+    }
+
+    /**
      * Generates random html element id.
      *
      * @staticvar int $counter
@@ -1350,7 +1366,7 @@ class html_writer {
         if (empty($attributes['id'])) {
             $attributes['id'] = self::random_id('ts_');
         }
-        $timerselector = self::select($timeunits, $name, $currentdate[$userdatetype], null, array('id'=>$attributes['id']));
+        $timerselector = self::select($timeunits, $name, $currentdate[$userdatetype], null, $attributes);
         $label = self::tag('label', get_string(substr($type, 0, -1), 'form'), array('for'=>$attributes['id'], 'class'=>'accesshide'));
 
         return $label.$timerselector;
@@ -1425,6 +1441,9 @@ class html_writer {
      * If this is not what you want, you should make a full clone of your data before passing them to this
      * method. In most cases this is not an issue at all so we do not clone by default for performance
      * and memory consumption reasons.
+     *
+     * Please do not use .r0/.r1 for css, as they will be removed in Moodle 2.9.
+     * @todo MDL-43902 , remove r0 and r1 from tr classes.
      *
      * @param html_table $table data to be rendered
      * @return string HTML code
@@ -3102,6 +3121,30 @@ class action_menu implements renderable {
     public $attributessecondary = array();
 
     /**
+     * The string to use next to the icon for the action icon relating to the secondary (dropdown) menu.
+     * @var array
+     */
+    public $actiontext = null;
+
+    /**
+     * An icon to use for the toggling the secondary menu (dropdown).
+     * @var actionicon
+     */
+    public $actionicon;
+
+    /**
+     * Any text to use for the toggling the secondary menu (dropdown).
+     * @var menutrigger
+     */
+    public $menutrigger = '';
+
+    /**
+     * Place the action menu before all other actions.
+     * @var prioritise
+     */
+    public $prioritise = false;
+
+    /**
      * Constructs the action menu with the given items.
      *
      * @param array $actions An array of actions.
@@ -3134,6 +3177,10 @@ class action_menu implements renderable {
         }
     }
 
+    public function set_menu_trigger($trigger) {
+        $this->menutrigger = $trigger;
+    }
+
     /**
      * Initialises JS required fore the action menu.
      * The JS is only required once as it manages all action menu's on the page.
@@ -3154,7 +3201,7 @@ class action_menu implements renderable {
      * @param action_menu_link|pix_icon|string $action
      */
     public function add($action) {
-        if ($action instanceof action_menu_link) {
+        if ($action instanceof action_link) {
             if ($action->primary) {
                 $this->add_primary_action($action);
             } else {
@@ -3208,22 +3255,46 @@ class action_menu implements renderable {
         if ($output === null) {
             $output = $OUTPUT;
         }
-        $title = get_string('actions', 'moodle');
-        $pixicon = $output->pix_icon(
-            't/contextmenu',
-            $title,
-            'moodle',
-            array('class' => 'iconsmall', 'title' => '')
-        );
+        $pixicon = $this->actionicon;
+        $linkclasses = array('toggle-display');
 
+        $title = '';
+        if (!empty($this->menutrigger)) {
+            $pixicon = '<b class="caret"></b>';
+            $linkclasses[] = 'textmenu';
+        } else {
+            $title = new lang_string('actions', 'moodle');
+            $this->actionicon = new pix_icon(
+                't/edit_menu',
+                '',
+                'moodle',
+                array('class' => 'iconsmall actionmenu', 'title' => '')
+            );
+            $pixicon = $this->actionicon;
+        }
+        if ($pixicon instanceof renderable) {
+            $pixicon = $output->render($pixicon);
+            if ($pixicon instanceof pix_icon && isset($pixicon->attributes['alt'])) {
+                $title = $pixicon->attributes['alt'];
+            }
+        }
+        $string = '';
+        if ($this->actiontext) {
+            $string = $this->actiontext;
+        }
         $actions = $this->primaryactions;
         $attributes = array(
-            'class' => 'toggle-display',
+            'class' => implode(' ', $linkclasses),
             'title' => $title,
             'id' => 'action-menu-toggle-'.$this->instance,
             'role' => 'menuitem'
         );
-        $actions[] = html_writer::link('#', $pixicon, $attributes);
+        $link = html_writer::link('#', $string . $this->menutrigger . $pixicon, $attributes);
+        if ($this->prioritise) {
+            array_unshift($actions, $link);
+        } else {
+            $actions[] = $link;
+        }
         return $actions;
     }
 
@@ -3290,7 +3361,7 @@ class action_menu implements renderable {
      *
      * @param string $ancestorselector A snippet of CSS used to identify the ancestor to contrain the dialogue to.
      */
-    public function set_contraint($ancestorselector) {
+    public function set_constraint($ancestorselector) {
         $this->attributessecondary['data-constraint'] = $ancestorselector;
     }
 
@@ -3310,6 +3381,29 @@ class action_menu implements renderable {
      */
     public function will_be_enhanced() {
         return isset($this->attributes['data-enhance']);
+    }
+}
+
+/**
+ * An action menu filler
+ *
+ * @package core
+ * @category output
+ * @copyright 2013 Andrew Nicols
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class action_menu_filler extends action_link implements renderable {
+
+    /**
+     * True if this is a primary action. False if not.
+     * @var bool
+     */
+    public $primary = true;
+
+    /**
+     * Constructs the object.
+     */
+    public function __construct() {
     }
 }
 
@@ -3344,7 +3438,7 @@ class action_menu_link extends action_link implements renderable {
      * @param bool $primary Whether this is a primary action or not.
      * @param array $attributes Any attribtues associated with the action.
      */
-    public function __construct(moodle_url $url, pix_icon $icon, $text, $primary = true, array $attributes = array()) {
+    public function __construct(moodle_url $url, pix_icon $icon = null, $text, $primary = true, array $attributes = array()) {
         parent::__construct($url, $text, null, $attributes, $icon);
         $this->primary = (bool)$primary;
         $this->add_class('menu-action');
@@ -3369,7 +3463,7 @@ class action_menu_link_primary extends action_menu_link {
      * @param string $text
      * @param array $attributes
      */
-    public function __construct(moodle_url $url, pix_icon $icon, $text, array $attributes = array()) {
+    public function __construct(moodle_url $url, pix_icon $icon = null, $text, array $attributes = array()) {
         parent::__construct($url, $icon, $text, true, $attributes);
     }
 }
@@ -3391,7 +3485,7 @@ class action_menu_link_secondary extends action_menu_link {
      * @param string $text
      * @param array $attributes
      */
-    public function __construct(moodle_url $url, pix_icon $icon, $text, array $attributes = array()) {
+    public function __construct(moodle_url $url, pix_icon $icon = null, $text, array $attributes = array()) {
         parent::__construct($url, $icon, $text, false, $attributes);
     }
 }

@@ -165,9 +165,9 @@ class core_cache_administration_helper_testcase extends advanced_testcase {
      */
     public function test_get_edit_store_form() {
         $config = cache_config_writer::instance();
-        $this->assertTrue($config->add_store_instance('summariesstore', 'file'));
+        $this->assertTrue($config->add_store_instance('test_get_edit_store_form', 'file'));
 
-        $form = cache_administration_helper::get_edit_store_form('file', 'summariesstore');
+        $form = cache_administration_helper::get_edit_store_form('file', 'test_get_edit_store_form');
         $this->assertInstanceOf('moodleform', $form);
 
         try {
@@ -189,11 +189,8 @@ class core_cache_administration_helper_testcase extends advanced_testcase {
      * Test the hash_key functionality.
      */
     public function test_hash_key() {
-        global $CFG;
-
-        $currentdebugging = $CFG->debug;
-
-        $CFG->debug = E_ALL;
+        $this->resetAfterTest();
+        set_debugging(DEBUG_ALL);
 
         // First with simplekeys
         $instance = cache_config_phpunittest::instance(true);
@@ -230,7 +227,5 @@ class core_cache_administration_helper_testcase extends advanced_testcase {
 
         $result = cache_helper::hash_key('test/test', $definition);
         $this->assertEquals(sha1($definition->generate_single_key_prefix().'-test/test'), $result);
-
-        $CFG->debug = $currentdebugging;
     }
 }

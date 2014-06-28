@@ -21,8 +21,7 @@
  *
  * Included by import.ph
  *
- * @package    mod
- * @subpackage lesson
+ * @package mod_lesson
  * @copyright  1999 onwards Martin Dougiamas  {@link http://moodle.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  **/
@@ -285,6 +284,7 @@ class qformat_default {
     var $displayerrors = true;
     var $category = null;
     var $questionids = array();
+    protected $importcontext = null;
     var $qtypeconvert = array('numerical'   => LESSON_PAGE_NUMERICAL,
                                'multichoice' => LESSON_PAGE_MULTICHOICE,
                                'truefalse'   => LESSON_PAGE_TRUEFALSE,
@@ -295,6 +295,30 @@ class qformat_default {
     // Importing functions
     function provide_import() {
         return false;
+    }
+
+    function set_importcontext($context) {
+        $this->importcontext = $context;
+    }
+
+    /**
+     * Handle parsing error
+     *
+     * @param string $message information about error
+     * @param string $text imported text that triggered the error
+     * @param string $questionname imported question name
+     */
+    protected function error($message, $text='', $questionname='') {
+        $importerrorquestion = get_string('importerrorquestion', 'question');
+
+        echo "<div class=\"importerror\">\n";
+        echo "<strong>$importerrorquestion $questionname</strong>";
+        if (!empty($text)) {
+            $text = s($text);
+            echo "<blockquote>$text</blockquote>\n";
+        }
+        echo "<strong>$message</strong>\n";
+        echo "</div>";
     }
 
     function importpreprocess() {
@@ -409,6 +433,15 @@ class qformat_default {
                     $question->id = $newpageid;
 
                     $this->questionids[] = $question->id;
+
+                    // Import images in question text.
+                    if (isset($question->questiontextitemid)) {
+                        $questiontext = file_save_draft_area_files($question->questiontextitemid,
+                                $this->importcontext->id, 'mod_lesson', 'page_contents', $newpageid,
+                                null , $question->questiontext);
+                        // Update content with recoded urls.
+                        $DB->set_field("lesson_pages", "contents", $questiontext, array("id" => $newpageid));
+                    }
 
                     // Now to save all the answers and type-specific options
 
@@ -603,7 +636,12 @@ class qformat_default {
     protected function format_question_text($question) {
         $formatoptions = new stdClass();
         $formatoptions->noclean = true;
-        return html_to_text(format_text($question->questiontext,
+        // The html_to_text call strips out all URLs, but format_text complains
+        // if it finds @@PLUGINFILE@@ tokens. So, we need to replace
+        // @@PLUGINFILE@@ with a real URL, but it doesn't matter what.
+        // We use http://example.com/.
+        $text = str_replace('@@PLUGINFILE@@/', 'http://example.com/', $question->questiontext);
+        return html_to_text(format_text($text,
                 $question->questiontextformat, $formatoptions), 0, false);
     }
 

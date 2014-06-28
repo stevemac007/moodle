@@ -18,7 +18,7 @@
 /**
  * This plugin is used to access user's private files
  *
- * @since 2.0
+ * @since Moodle 2.0
  * @package    repository_user
  * @copyright  2010 Dongsheng Cai {@link http://dongsheng.org}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -28,7 +28,7 @@ require_once($CFG->dirroot . '/repository/lib.php');
 /**
  * repository_user class is used to browse user private files
  *
- * @since     2.0
+ * @since     Moodle 2.0
  * @package   repository_user
  * @copyright 2010 Dongsheng Cai {@link http://dongsheng.org}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -157,17 +157,6 @@ class repository_user extends repository {
      */
     public function supported_returntypes() {
         return FILE_INTERNAL | FILE_REFERENCE;
-    }
-
-    /**
-     * Return reference file life time
-     *
-     * @param string $ref
-     * @return int
-     */
-    public function get_reference_file_lifetime($ref) {
-        // this should be realtime
-        return 0;
     }
 
     /**

@@ -181,6 +181,7 @@ $CFG->dboptions = isset($CFG->phpunit_dboptions) ? $CFG->phpunit_dboptions : $CF
 $allowed = array('wwwroot', 'dataroot', 'dirroot', 'admin', 'directorypermissions', 'filepermissions',
                  'dbtype', 'dblibrary', 'dbhost', 'dbname', 'dbuser', 'dbpass', 'prefix', 'dboptions',
                  'proxyhost', 'proxyport', 'proxytype', 'proxyuser', 'proxypassword', 'proxybypass', // keep proxy settings from config.php
+                 'altcacheconfigpath', 'pathtogs', 'pathtoclam', 'pathtodu', 'aspellpath', 'pathtodot'
                 );
 $productioncfg = (array)$CFG;
 $CFG = new stdClass();
@@ -198,13 +199,13 @@ unset($productioncfg);
 
 // force the same CFG settings in all sites
 $CFG->debug = (E_ALL | E_STRICT); // can not use DEBUG_DEVELOPER yet
+$CFG->debugdeveloper = true;
 $CFG->debugdisplay = 1;
 error_reporting($CFG->debug);
 ini_set('display_errors', '1');
 ini_set('log_errors', '1');
 
 $CFG->noemailever = true; // better not mail anybody from tests, override temporarily if necessary
-$CFG->cachetext = 0; // disable this very nasty setting
 
 // some ugly hacks
 $CFG->themerev = 1;

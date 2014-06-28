@@ -18,7 +18,7 @@
 /**
  * Strings for component 'forum', language 'en', branch 'MOODLE_20_STABLE'
  *
- * @package   forum
+ * @package   mod_forum
  * @copyright 1999 onwards Martin Dougiamas  {@link http://moodle.com}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -79,6 +79,8 @@ $string['cannotupdatepost'] = 'You can not update this post';
 $string['cannotviewpostyet'] = 'You cannot read other students questions in this discussion yet because you haven\'t posted';
 $string['cannotviewusersposts'] = 'There are no posts made by this user that you are able to view.';
 $string['cleanreadtime'] = 'Mark old posts as read hour';
+$string['clicktounsubscribe'] = 'You are subscribed to this discussion. Click to unsubscribe.';
+$string['clicktosubscribe'] = 'Not subscribed. Click to subscribe.';
 $string['completiondiscussions'] = 'Student must create discussions:';
 $string['completiondiscussionsgroup'] = 'Require discussions';
 $string['completiondiscussionshelp'] = 'requiring discussions to complete';
@@ -100,6 +102,7 @@ $string['configmaxbytes'] = 'Default maximum size for all forum attachments on t
 $string['configoldpostdays'] = 'Number of days old any post is considered read.';
 $string['configreplytouser'] = 'When a forum post is mailed out, should it contain the user\'s email address so that recipients can reply personally rather than via the forum? Even if set to \'Yes\' users can choose in their profile to keep their email address secret.';
 $string['configshortpost'] = 'Any post under this length (in characters not including HTML) is considered short (see below).';
+$string['configtrackingtype'] = 'Default setting for read tracking.';
 $string['configtrackreadposts'] = 'Set to \'yes\' if you want to track read/unread for each user.';
 $string['configusermarksread'] = 'If \'yes\', the user must manually mark a post as read. If \'no\', when the post is viewed it is marked as read.';
 $string['confirmsubscribe'] = 'Do you really want to subscribe to forum \'{$a}\'?';
@@ -120,11 +123,19 @@ $string['digestmailsubject'] = '{$a}: forum digest';
 $string['digestmailtime'] = 'Hour to send digest emails';
 $string['digestsentusers'] = 'Email digests successfully sent to {$a} users.';
 $string['disallowsubscribe'] = 'Subscriptions not allowed';
+$string['disallowsubscription'] = 'Subscription';
+$string['disallowsubscription_help'] = 'This forum has been configured so that you cannot subscribe to discussions.';
 $string['disallowsubscribeteacher'] = 'Subscriptions not allowed (except for teachers)';
 $string['discussion'] = 'Discussion';
 $string['discussionmoved'] = 'This discussion has been moved to \'{$a}\'.';
 $string['discussionmovedpost'] = 'This discussion has been moved to <a href="{$a->discusshref}">here</a> in the forum <a href="{$a->forumhref}">{$a->forumname}</a>';
 $string['discussionname'] = 'Discussion name';
+$string['discussionnownotsubscribed'] = '{$a->name} will NOT be notified of new posts in \'{$a->name}\' of \'{$a->forum}\'';
+$string['discussionnowsubscribed'] = '{$a->name} will be notified of new posts in \'{$a->name}\' of \'{$a->forum}\'';
+$string['discussionsubscribestop'] = 'I don\'t want email copies of posts to this discussion';
+$string['discussionsubscribestart'] = 'Send me email copies of posts to this discussion';
+$string['discussionsubscription'] = 'Discussion subscription';
+$string['discussionsubscription_help'] = 'Subscribing to a discussion means you will receive notifications of new posts to that discussion.';
 $string['discussions'] = 'Discussions';
 $string['discussionsstartedby'] = 'Discussions started by {$a}';
 $string['discussionsstartedbyrecent'] = 'Discussions recently started by {$a}';
@@ -143,6 +154,23 @@ $string['edit'] = 'Edit';
 $string['editedby'] = 'Edited by {$a->name} - original submission {$a->date}';
 $string['editedpostupdated'] = '{$a}\'s post was updated';
 $string['editing'] = 'Editing';
+$string['eventcoursesearched'] = 'Course searched';
+$string['eventdiscussioncreated'] = 'Discussion created';
+$string['eventdiscussionupdated'] = 'Discussion updated';
+$string['eventdiscussiondeleted'] = 'Discussion deleted';
+$string['eventdiscussionmoved'] = 'Discussion moved';
+$string['eventdiscussionviewed'] = 'Discussion viewed';
+$string['eventdiscussionsubscriptioncreated'] = 'Discussion subscription created';
+$string['eventdiscussionsubscriptiondeleted'] = 'Discussion subscription deleted';
+$string['eventuserreportviewed'] = 'User report viewed';
+$string['eventpostcreated'] = 'Post created';
+$string['eventpostdeleted'] = 'Post deleted';
+$string['eventpostupdated'] = 'Post updated';
+$string['eventreadtrackingdisabled'] = 'Read tracking disabled';
+$string['eventreadtrackingenabled'] = 'Read tracking enabled';
+$string['eventsubscribersviewed'] = 'Subscribers viewed';
+$string['eventsubscriptioncreated'] = 'Subscription created';
+$string['eventsubscriptiondeleted'] = 'Subscription deleted';
 $string['emaildigestcompleteshort'] = 'Complete posts';
 $string['emaildigestdefault'] = 'Default ({$a})';
 $string['emaildigestoffshort'] = 'No digest';
@@ -165,14 +193,17 @@ $string['erroremptymessage'] = 'Post message cannot be empty';
 $string['erroremptysubject'] = 'Post subject cannot be empty.';
 $string['errorenrolmentrequired'] = 'You must be enrolled in this course to access this content';
 $string['errorwhiledelete'] = 'An error occurred while deleting record.';
-$string['event_assessable_uploaded'] = 'Some content has been posted.';
+$string['eventassessableuploaded'] = 'Some content has been posted.';
 $string['everyonecanchoose'] = 'Everyone can choose to be subscribed';
 $string['everyonecannowchoose'] = 'Everyone can now choose to be subscribed';
 $string['everyoneisnowsubscribed'] = 'Everyone is now subscribed to this forum';
 $string['everyoneissubscribed'] = 'Everyone is subscribed to this forum';
 $string['existingsubscribers'] = 'Existing subscribers';
 $string['exportdiscussion'] = 'Export whole discussion';
-$string['forcessubscribe'] = 'This forum forces everyone to be subscribed';
+$string['forcedreadtracking'] = 'Allow forced read tracking';
+$string['forcedreadtracking_desc'] = 'Allows forums to be set to forced read tracking. Will result in decreased performance for some users, particularly on courses with many forums and posts. When off, any forums previously set to Forced are treated as optional.';
+$string['forcesubscribed_help'] = 'This forum has been configured so that you cannot unsubscribe from discussions.';
+$string['forcesubscribed'] = 'This forum forces everyone to be subscribed';
 $string['forum'] = 'Forum';
 $string['forum:addinstance'] = 'Add a new forum';
 $string['forum:addnews'] = 'Add news';
@@ -220,6 +251,7 @@ $string['forum:viewrating'] = 'View the total rating you received';
 $string['forum:viewsubscribers'] = 'View subscribers';
 $string['generalforum'] = 'Standard forum for general use';
 $string['generalforums'] = 'General forums';
+$string['hiddenforumpost'] = 'Hidden forum post';
 $string['inforum'] = 'in {$a}';
 $string['introblog'] = 'The posts in this forum were copied here automatically from blogs of users in this course because those blog entries are no longer available';
 $string['intronews'] = 'General news and announcements';
@@ -320,9 +352,6 @@ $string['numposts'] = '{$a} posts';
 $string['olderdiscussions'] = 'Older discussions';
 $string['oldertopics'] = 'Older topics';
 $string['oldpostdays'] = 'Read after days';
-$string['openmode0'] = 'No discussions, no replies';
-$string['openmode1'] = 'No discussions, but replies are allowed';
-$string['openmode2'] = 'Discussions and replies are allowed';
 $string['overviewnumpostssince'] = '{$a} posts since last login';
 $string['overviewnumunread'] = '{$a} total unread';
 $string['page-mod-forum-x'] = 'Any forum module page';
@@ -335,11 +364,13 @@ $string['pluginname'] = 'Forum';
 $string['postadded'] = '<p>Your post was successfully added.</p> <p>You have {$a} to edit it if you want to make any changes.</p>';
 $string['postaddedsuccess'] = 'Your post was successfully added.';
 $string['postaddedtimeleft'] = 'You have {$a} to edit it if you want to make any changes.';
+$string['postbyuser'] = '{$a->post} by {$a->user}';
 $string['postincontext'] = 'See this post in context';
 $string['postmailinfo'] = 'This is a copy of a message posted on the {$a} website.
 
 To reply click on this link:';
 $string['postmailnow'] = '<p>This post will be mailed out immediately to all forum subscribers.</p>';
+$string['postmailsubject'] = '{$a->courseshortname}: {$a->subject}';
 $string['postrating1'] = 'Mostly separate knowing';
 $string['postrating2'] = 'Separate and connected';
 $string['postrating3'] = 'Mostly connected knowing';
@@ -429,16 +460,14 @@ $string['timestartenderror'] = 'Display end date cannot be earlier than the star
 $string['trackforum'] = 'Track unread posts';
 $string['tracking'] = 'Track';
 $string['trackingoff'] = 'Off';
-$string['trackingon'] = 'On';
+$string['trackingon'] = 'Forced';
 $string['trackingoptional'] = 'Optional';
-$string['trackingtype'] = 'Read tracking for this forum?';
-$string['trackingtype_help'] = 'If enabled, participants can track read and unread messages in the forum and in discussions.
+$string['trackingtype'] = 'Read tracking';
+$string['trackingtype_help'] = 'If enabled, participants can track read and unread posts in the forum and in discussions. There are three options:
 
-There are three options:
-
-* Optional - Participants can choose whether to turn tracking on or off
-* On - Tracking is always on
-* Off - Tracking is always off';
+* Optional - Participants can choose whether to turn tracking on or off via a link in the administration block. Forum tracking must also be enabled in the user\'s profile settings.
+* Forced - Tracking is always on, regardless of user setting. Available depending on administrative setting.
+* Off - Read and unread posts are not tracked.';
 $string['unread'] = 'Unread';
 $string['unreadposts'] = 'Unread posts';
 $string['unreadpostsnumber'] = '{$a} unread posts';

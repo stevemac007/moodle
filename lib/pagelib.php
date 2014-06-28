@@ -87,6 +87,8 @@ defined('MOODLE_INTERNAL') || die();
  * @property-read string $pagetype The page type string, should be used as the id for the body tag in the theme.
  * @property-read int $periodicrefreshdelay The periodic refresh delay to use with meta refresh
  * @property-read page_requirements_manager $requires Tracks the JavaScript, CSS files, etc. required by this page.
+ * @property-read string $requestip The IP address of the current request, null if unknown.
+ * @property-read string $requestorigin The type of request 'web', 'ws', 'cli', 'restore', etc.
  * @property-read settings_navigation $settingsnav The settings navigation
  * @property-read int $state One of the STATE_... constants
  * @property-read string $subpage The subpage identifier, if any.
@@ -640,7 +642,7 @@ class moodle_page {
     /**
      * Returns an array of minipulations or false if there are none to make.
      *
-     * @since 2.5.1 2.6
+     * @since Moodle 2.5.1 2.6
      * @return bool|array
      */
     protected function magic_get_blockmanipulations() {
@@ -659,7 +661,7 @@ class moodle_page {
      */
     protected function magic_get_devicetypeinuse() {
         if (empty($this->_devicetypeinuse)) {
-            $this->_devicetypeinuse = get_user_device_type();
+            $this->_devicetypeinuse = core_useragent::get_user_device_type();
         }
         return $this->_devicetypeinuse;
     }
@@ -720,6 +722,38 @@ class moodle_page {
     }
 
     /**
+     * Returns request IP address.
+     *
+     * @return string IP address or null if unknown
+     */
+    protected function magic_get_requestip() {
+        return getremoteaddr(null);
+    }
+
+    /**
+     * Returns the origin of current request.
+     *
+     * Note: constants are not required because we need to use these values in logging and reports.
+     *
+     * @return string 'web', 'ws', 'cli', 'restore', etc.
+     */
+    protected function magic_get_requestorigin() {
+        if (class_exists('restore_controller', false) && restore_controller::is_executing()) {
+            return 'restore';
+        }
+
+        if (WS_SERVER) {
+            return 'ws';
+        }
+
+        if (CLI_SCRIPT) {
+            return 'cli';
+        }
+
+        return 'web';
+    }
+
+    /**
      * PHP overloading magic to make the $PAGE->course syntax work by redirecting
      * it to the corresponding $PAGE->magic_get_course() method if there is one, and
      * throwing an exception if not.
@@ -769,6 +803,12 @@ class moodle_page {
      * @return renderer_base
      */
     public function get_renderer($component, $subtype = null, $target = null) {
+        if ($this->pagelayout === 'maintenance') {
+            // If the page is using the maintenance layout then we're going to force target to maintenance.
+            // This leads to a special core renderer that is designed to block access to API's that are likely unavailable for this
+            // page layout.
+            $target = RENDERER_TARGET_MAINTENANCE;
+        }
         return $this->magic_get_theme()->get_renderer($this, $component, $subtype, $target);
     }
 
@@ -925,7 +965,11 @@ class moodle_page {
             } else {
                 // We do not want devs to do weird switching of context levels on the fly because we might have used
                 // the context already such as in text filter in page title.
-                debugging("Coding problem: unsupported modification of PAGE->context from {$current} to {$context->contextlevel}");
+                // This is explicitly allowed for webservices though which may
+                // call "external_api::validate_context on many contexts in a single request.
+                if (!WS_SERVER) {
+                    debugging("Coding problem: unsupported modification of PAGE->context from {$current} to {$context->contextlevel}");
+                }
             }
         }
 
@@ -1475,7 +1519,14 @@ class moodle_page {
         }
 
         if ($this === $PAGE) {
-            $OUTPUT = $this->get_renderer('core');
+            $target = null;
+            if ($this->pagelayout === 'maintenance') {
+                // If the page is using the maintenance layout then we're going to force target to maintenance.
+                // This leads to a special core renderer that is designed to block access to API's that are likely unavailable for this
+                // page layout.
+                $target = RENDERER_TARGET_MAINTENANCE;
+            }
+            $OUTPUT = $this->get_renderer('core', null, $target);
         }
 
         $this->_wherethemewasinitialised = debug_backtrace();
@@ -1549,12 +1600,12 @@ class moodle_page {
                         return $mnetpeertheme;
                     }
                     // First try for the device the user is using.
-                    $devicetheme = get_selected_theme_for_device_type($this->devicetypeinuse);
+                    $devicetheme = core_useragent::get_device_type_theme($this->devicetypeinuse);
                     if (!empty($devicetheme)) {
                         return $devicetheme;
                     }
                     // Next try for the default device (as a fallback).
-                    $devicetheme = get_selected_theme_for_device_type('default');
+                    $devicetheme = core_useragent::get_device_type_theme('default');
                     if (!empty($devicetheme)) {
                         return $devicetheme;
                     }
@@ -1636,7 +1687,7 @@ class moodle_page {
             $this->add_body_class('path-' . join('-', array_slice($pathbits, 0, $i)));
         }
 
-        $this->add_body_classes(get_browser_version_classes());
+        $this->add_body_classes(core_useragent::get_browser_version_classes());
         $this->add_body_class('dir-' . get_string('thisdirection', 'langconfig'));
         $this->add_body_class('lang-' . current_language());
         $this->add_body_class('yui-skin-sam'); // Make YUI happy, if it is used.
@@ -1773,7 +1824,6 @@ class moodle_page {
 
     /**
      * Ensure the theme has not been loaded yet. If it has an exception is thrown.
-     * @source
      *
      * @throws coding_exception
      */
@@ -1860,7 +1910,7 @@ class moodle_page {
     /**
      * Returns the block region having made any required theme manipulations.
      *
-     * @since 2.5.1 2.6
+     * @since Moodle 2.5.1 2.6
      * @param string $region
      * @return string
      */

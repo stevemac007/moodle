@@ -39,6 +39,11 @@ require_once($CFG->libdir . '/csslib.php');
  */
 class core_csslib_testcase extends advanced_testcase {
 
+    /**
+     * Returns a CSS optimiser
+     *
+     * @return css_optimiser
+     */
     protected function get_optimiser() {
         return new css_optimiser();
     }
@@ -377,6 +382,9 @@ class core_csslib_testcase extends advanced_testcase {
         $this->assertSame($css, $optimiser->process($css));
     }
 
+    /**
+     * Test widths.
+     */
     public function test_widths() {
         $optimiser = new css_optimiser();
 
@@ -503,6 +511,9 @@ class core_csslib_testcase extends advanced_testcase {
         $this->assertSame($cssout, $optimiser->process($cssin));
     }
 
+    /**
+     * Test cursor optimisations
+     */
     public function test_cursor() {
         $optimiser = new css_optimiser();
 
@@ -527,6 +538,9 @@ class core_csslib_testcase extends advanced_testcase {
         $this->assertSame($cssout, $optimiser->process($cssin));
     }
 
+    /**
+     * Test vertical align optimisations
+     */
     public function test_vertical_align() {
         $optimiser = new css_optimiser();
 
@@ -550,6 +564,9 @@ class core_csslib_testcase extends advanced_testcase {
         $this->assertSame($cssout, $optimiser->process($cssin));
     }
 
+    /**
+     * Test float optimisations
+     */
     public function test_float() {
         $optimiser = new css_optimiser();
 
@@ -697,7 +714,7 @@ class core_csslib_testcase extends advanced_testcase {
 
         // Test some complex IE css... I couldn't even think of a more complext solution
         // than the CSS they came up with.
-        $cssin  = 'a { opacity: 0.5; -ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=50)"; filter: alpha(opacity=50); }';
+        $cssin  = 'a { opacity: 0.5;-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=50)"; filter: alpha(opacity=50); }';
         $cssout = 'a{opacity:0.5;-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";filter:alpha(opacity=50);}';
         $this->assertSame($cssout, $optimiser->process($cssin));
     }
@@ -1027,9 +1044,27 @@ CSS;
         $cssin = "@media screen and (min-width:30px) {\n  #region-main-box{background-color:#000;}\n}\n@media screen and (min-width:31px) {\n  #region-main-box{background-color:#FFF;}\n}";
         $cssout = "@media screen and (min-width:30px) { #region-main-box{background-color:#000;} }\n@media screen and (min-width:31px) { #region-main-box{background-color:#FFF;} }";
         $this->assertSame($cssout, $optimiser->process($cssin));
+
+        $cssin = "@media (min-width: 768px) and (max-width: 979px) {\n*{*zoom:1;}}";
+        $cssout = "@media (min-width: 768px) and (max-width: 979px) { *{*zoom:1;} }";
+        $this->assertSame($cssout, $optimiser->process($cssin));
+
+        $cssin = "#test {min-width:1200px;}@media (min-width: 768px) {#test {min-width: 1024px;}}";
+        $cssout = "#test{min-width:1200px;} \n@media (min-width: 768px) { #test{min-width:1024px;} }";
+        $this->assertSame($cssout, $optimiser->process($cssin));
+
+        $cssin = "@media(min-width:768px){#page-calender-view .container fluid{min-width:1024px}}.section_add_menus{text-align:right}";
+        $cssout = ".section_add_menus{text-align:right;} \n@media (min-width:768px) { #page-calender-view .container fluid{min-width:1024px;} }";
+        $this->assertSame($cssout, $optimiser->process($cssin));
+
+        $cssin = "@-ms-keyframes progress-bar-stripes{from{background-position:40px 0}to{background-position:0 0}}";
+        $cssout = "@-ms-keyframes progress-bar-stripes {from{background-position:40px 0;}to{background-position:0 0;}}";
+        $this->assertSame($cssout, $optimiser->process($cssin));
     }
 
-
+    /**
+     * Test the ordering of CSS optimisationss
+     */
     public function test_css_optimisation_ordering() {
         $optimiser = $this->get_optimiser();
 
@@ -1041,10 +1076,13 @@ CSS;
         $this->assertSame($cssout, $optimiser->process($cssin));
     }
 
+    /**
+     * Test CSS chunking
+     */
     public function test_css_chunking() {
         // Test with an even number of styles.
         $css = 'a{}b{}c{}d{}e{}f{}';
-        $chunks = css_chunk_by_selector_count($css, 'styles.php?type=test', 2, 0);
+        $chunks = css_chunk_by_selector_count($css, 'styles.php?type=test', 2);
         $this->assertInternalType('array', $chunks);
         $this->assertCount(3, $chunks);
         $this->assertArrayHasKey(0, $chunks);
@@ -1056,7 +1094,7 @@ CSS;
 
         // Test with an odd number of styles.
         $css = 'a{}b{}c{}d{}e{}';
-        $chunks = css_chunk_by_selector_count($css, 'styles.php?type=test', 2, 0);
+        $chunks = css_chunk_by_selector_count($css, 'styles.php?type=test', 2);
         $this->assertInternalType('array', $chunks);
         $this->assertCount(3, $chunks);
         $this->assertArrayHasKey(0, $chunks);
@@ -1066,21 +1104,9 @@ CSS;
         $this->assertSame('c{}d{}', $chunks[1]);
         $this->assertSame("@import url(styles.php?type=test&chunk=1);\n@import url(styles.php?type=test&chunk=2);\ne{}", $chunks[2]);
 
-        // Test buffering. Set a buffer that will reduce the effective sheet size back to two.
-        $css = 'a{}b{}c{}d{}e{}f{}';
-        $chunks = css_chunk_by_selector_count($css, 'styles.php?type=test', 6, 4);
-        $this->assertInternalType('array', $chunks);
-        $this->assertCount(3, $chunks);
-        $this->assertArrayHasKey(0, $chunks);
-        $this->assertArrayHasKey(1, $chunks);
-        $this->assertArrayHasKey(2, $chunks);
-        $this->assertSame('a{}b{}', $chunks[0]);
-        $this->assertSame('c{}d{}', $chunks[1]);
-        $this->assertSame("@import url(styles.php?type=test&chunk=1);\n@import url(styles.php?type=test&chunk=2);\ne{}f{}", $chunks[2]);
-
         // Test well placed commas.
         $css = 'a,b{}c,d{}e,f{}';
-        $chunks = css_chunk_by_selector_count($css, 'styles.php?type=test', 2, 0);
+        $chunks = css_chunk_by_selector_count($css, 'styles.php?type=test', 2);
         $this->assertInternalType('array', $chunks);
         $this->assertCount(3, $chunks);
         $this->assertArrayHasKey(0, $chunks);
@@ -1092,55 +1118,207 @@ CSS;
 
         // Test unfortunately placed commas.
         $css = 'a{}b,c{color:red;}d{}e{}f{}';
-        $chunks = css_chunk_by_selector_count($css, 'styles.php?type=test', 2, 0);
+        $chunks = css_chunk_by_selector_count($css, 'styles.php?type=test', 2);
         $this->assertInternalType('array', $chunks);
-        $this->assertCount(3, $chunks);
+        $this->assertCount(4, $chunks);
         $this->assertArrayHasKey(0, $chunks);
         $this->assertArrayHasKey(1, $chunks);
         $this->assertArrayHasKey(2, $chunks);
-        $this->assertSame('a{}b{color:red;}', $chunks[0]);
-        $this->assertSame('c{color:red;}d{}', $chunks[1]);
-        $this->assertSame("@import url(styles.php?type=test&chunk=1);\n@import url(styles.php?type=test&chunk=2);\ne{}f{}", $chunks[2]);
+        $this->assertArrayHasKey(3, $chunks);
+        $this->assertSame('a{}', $chunks[0]);
+        $this->assertSame('b,c{color:red;}', $chunks[1]);
+        $this->assertSame('d{}e{}', $chunks[2]);
+        $this->assertSame("@import url(styles.php?type=test&chunk=1);\n@import url(styles.php?type=test&chunk=2);\n@import url(styles.php?type=test&chunk=3);\nf{}", $chunks[3]);
 
         // Test unfortunate CSS.
         $css = 'a,b,c,d,e,f{color:red;}';
         $chunks = css_chunk_by_selector_count($css, 'styles.php?type=test', 2, 0);
         $this->assertInternalType('array', $chunks);
-        $this->assertCount(3, $chunks);
+        $this->assertCount(1, $chunks);
         $this->assertArrayHasKey(0, $chunks);
-        $this->assertArrayHasKey(1, $chunks);
-        $this->assertArrayHasKey(2, $chunks);
-        $this->assertSame('a,b{color:red;}', $chunks[0]);
-        $this->assertSame('c,d{color:red;}', $chunks[1]);
-        $this->assertSame("@import url(styles.php?type=test&chunk=1);\n@import url(styles.php?type=test&chunk=2);\ne,f{color:red;}", $chunks[2]);
+        $this->assertSame('a,b,c,d,e,f{color:red;}', $chunks[0]);
+        $this->assertDebuggingCalled('Could not find a safe place to split at offset(s): 6. Those were ignored.');
 
         // Test to make sure invalid CSS isn't totally ruined.
         $css = 'a{},,,e{},';
-        $chunks = css_chunk_by_selector_count($css, 'styles.php?type=test', 2, 0);
+        $chunks = css_chunk_by_selector_count($css, 'styles.php?type=test', 2);
         // Believe it or not we want to care what comes out here as this will be parsed correctly
         // by a browser.
-        $this->assertInternalType('array', $chunks);
-        $this->assertCount(2, $chunks);
-        $this->assertArrayHasKey(0, $chunks);
-        $this->assertArrayHasKey(1, $chunks);
-        $this->assertSame('a{},{}', $chunks[0]);
-        $this->assertSame("@import url(styles.php?type=test&chunk=1);\n,e{}/** Error chunking CSS **/", $chunks[1]);
-
-        // Test utter crap CSS to make sure we don't loop to our deaths.
-        $css = 'a,b,c,d,e,f';
-        $chunks = css_chunk_by_selector_count($css, 'styles.php?type=test', 2, 0);
         $this->assertInternalType('array', $chunks);
         $this->assertCount(3, $chunks);
         $this->assertArrayHasKey(0, $chunks);
         $this->assertArrayHasKey(1, $chunks);
         $this->assertArrayHasKey(2, $chunks);
-        $this->assertSame('a,b/** Error chunking CSS **/', $chunks[0]);
-        $this->assertSame('c,d/** Error chunking CSS **/', $chunks[1]);
-        $this->assertSame("@import url(styles.php?type=test&chunk=1);\n@import url(styles.php?type=test&chunk=2);\ne,f", $chunks[2]);
+        $this->assertSame('a{}', $chunks[0]);
+        $this->assertSame(',,,e{}', $chunks[1]);
+        $this->assertSame("@import url(styles.php?type=test&chunk=1);\n@import url(styles.php?type=test&chunk=2);\n,", $chunks[2]);
+        $this->assertDebuggingCalled('Could not find a safe place to split at offset(s): 6. Those were ignored.');
+
+        // Test utter crap CSS to make sure we don't loop to our deaths.
+        $css = 'a,b,c,d,e,f';
+        $chunks = css_chunk_by_selector_count($css, 'styles.php?type=test', 2);
+        $this->assertInternalType('array', $chunks);
+        $this->assertCount(1, $chunks);
+        $this->assertArrayHasKey(0, $chunks);
+        $this->assertSame($css, $chunks[0]);
+        $this->assertDebuggingCalled('Could not find a safe place to split at offset(s): 6. Those were ignored.');
+
         // Test another death situation to make sure we're invincible.
         $css = 'a,,,,,e';
-        $chunks = css_chunk_by_selector_count($css, 'styles.php?type=test', 2, 0);
+        $chunks = css_chunk_by_selector_count($css, 'styles.php?type=test', 2);
         $this->assertInternalType('array', $chunks);
+        $this->assertDebuggingCalled('Could not find a safe place to split at offset(s): 4. Those were ignored.');
         // I don't care what the outcome is, I just want to make sure it doesn't die.
+
+        // Test media queries.
+        $css = '@media (min-width: 980px) { .a,.b{} }';
+        $chunks = css_chunk_by_selector_count($css, 'styles.php?type=test', 2);
+        $this->assertCount(1, $chunks);
+        $this->assertSame('@media (min-width: 980px) { .a,.b{} }', $chunks[0]);
+
+        // Test media queries, with commas.
+        $css = '.a{} @media (min-width: 700px), handheld and (orientation: landscape) { .b{} }';
+        $chunks = css_chunk_by_selector_count($css, 'styles.php?type=test', 2);
+        $this->assertCount(1, $chunks);
+        $this->assertSame($css, $chunks[0]);
+
+        // Test special rules.
+        $css = 'a,b{ background-image: linear-gradient(to bottom, #ffffff, #cccccc);}d,e{}';
+        $chunks = css_chunk_by_selector_count($css, 'styles.php?type=test', 2);
+        $this->assertCount(2, $chunks);
+        $this->assertSame('a,b{ background-image: linear-gradient(to bottom, #ffffff, #cccccc);}', $chunks[0]);
+        $this->assertSame("@import url(styles.php?type=test&chunk=1);\nd,e{}", $chunks[1]);
+
+        // Test media queries with too many selectors.
+        $css = '@media (min-width: 980px) { a,b,c,d{} }';
+        $chunks = css_chunk_by_selector_count($css, 'styles.php?type=test', 2);
+        $this->assertCount(1, $chunks);
+        $this->assertSame('@media (min-width: 980px) { a,b,c,d{} }', $chunks[0]);
+        $this->assertDebuggingCalled('Could not find a safe place to split at offset(s): 34. Those were ignored.');
+
+        // Complex test.
+        $css = '@media (a) {b{}} c{} d,e{} f,g,h{} i,j{x:a,b,c} k,l{} @media(x){l,m{ y: a,b,c}} n{}';
+        $chunks = css_chunk_by_selector_count($css, 'styles.php?type=test', 3);
+        $this->assertCount(6, $chunks);
+        $this->assertSame('@media (a) {b{}} c{}', $chunks[0]);
+        $this->assertSame(' d,e{}', $chunks[1]);
+        $this->assertSame(' f,g,h{}', $chunks[2]);
+        $this->assertSame(' i,j{x:a,b,c}', $chunks[3]);
+        $this->assertSame(' k,l{}', $chunks[4]);
+        $this->assertSame("@import url(styles.php?type=test&chunk=1);\n@import url(styles.php?type=test&chunk=2);\n@import url(styles.php?type=test&chunk=3);\n@import url(styles.php?type=test&chunk=4);\n@import url(styles.php?type=test&chunk=5);\n @media(x){l,m{ y: a,b,c}} n{}", $chunks[5]);
+
+        // Multiple offset errors.
+        $css = 'a,b,c{} d,e,f{}';
+        $chunks = css_chunk_by_selector_count($css, 'styles.php?type=test', 2);
+        $this->assertCount(2, $chunks);
+        $this->assertSame('a,b,c{}', $chunks[0]);
+        $this->assertSame("@import url(styles.php?type=test&chunk=1);\n d,e,f{}", $chunks[1]);
+        $this->assertDebuggingCalled('Could not find a safe place to split at offset(s): 6, 14. Those were ignored.');
+
+        // Test the split according to IE.
+        $css = str_repeat('a{}', 4100);
+        $chunks = css_chunk_by_selector_count($css, 'styles.php?type=test');
+        $this->assertCount(2, $chunks);
+        $this->assertSame(str_repeat('a{}', 4095), $chunks[0]);
+        $this->assertSame("@import url(styles.php?type=test&chunk=1);\n" . str_repeat('a{}', 5), $chunks[1]);
+
+        // Test strip out comments.
+        $css = ".a {/** a\nb\nc */} /** a\nb\nc */ .b{} /** .c,.d{} */ e{}";
+        $chunks = css_chunk_by_selector_count($css, 'styles.php?type=test', 2);
+        $this->assertCount(2, $chunks);
+        $this->assertSame('.a {}  .b{}', $chunks[0]);
+        $this->assertSame("@import url(styles.php?type=test&chunk=1);\n  e{}", $chunks[1]);
+
+        // Test something with unicode characters.
+        $css = 'a,b{} nav a:hover:after { content: "↓"; } b{ color:test;}';
+        $chunks = css_chunk_by_selector_count($css, 'styles.php?type=test', 2);
+        $this->assertCount(2, $chunks);
+        $this->assertSame('a,b{}', $chunks[0]);
+        $this->assertSame("@import url(styles.php?type=test&chunk=1);\n nav a:hover:after { content: \"↓\"; } b{ color:test;}", $chunks[1]);
+
+        // Test that if there is broken CSS with too many close brace symbols,
+        // media rules after that point are still kept together.
+        $mediarule = '@media (width=480) {a{}b{}}';
+        $css = 'c{}}' . $mediarule . 'd{}';
+        $chunks = css_chunk_by_selector_count($css, 'styles.php?type=test', 2);
+        $this->assertCount(3, $chunks);
+        $this->assertEquals($mediarule, $chunks[1]);
+
+        // Test that this still works even with too many close brace symbols
+        // inside a media query (note: that broken media query may be split
+        // after the break, but any following ones should not be).
+        $brokenmediarule = '@media (width=480) {c{}}d{}}';
+        $css = $brokenmediarule . 'e{}' . $mediarule . 'f{}';
+        $chunks = css_chunk_by_selector_count($css, 'styles.php?type=test', 2);
+        $this->assertCount(4, $chunks);
+        $this->assertEquals($mediarule, $chunks[2]);
+    }
+
+    /**
+     * Test CSS3.
+     */
+    public function test_css3() {
+        $optimiser = $this->get_optimiser();
+
+        $css = '.test > .test{display:inline-block;}';
+        $this->assertSame($css, $optimiser->process($css));
+
+        $css = '*{display:inline-block;}';
+        $this->assertSame($css, $optimiser->process($css));
+
+        $css = 'div > *{display:inline-block;}';
+        $this->assertSame($css, $optimiser->process($css));
+
+        $css = 'div:nth-child(3){display:inline-block;}';
+        $this->assertSame($css, $optimiser->process($css));
+
+        $css = '.test:nth-child(3){display:inline-block;}';
+        $this->assertSame($css, $optimiser->process($css));
+
+        $css = '*:nth-child(3){display:inline-block;}';
+        $this->assertSame($css, $optimiser->process($css));
+
+        $css = '*[id]{display:inline-block;}';
+        $this->assertSame($css, $optimiser->process($css));
+
+        $css = '*[id=blah]{display:inline-block;}';
+        $this->assertSame($css, $optimiser->process($css));
+
+        $css = '*[*id=blah]{display:inline-block;}';
+        $this->assertSame($css, $optimiser->process($css));
+
+        $css = '*[*id=blah_]{display:inline-block;}';
+        $this->assertSame($css, $optimiser->process($css));
+
+        $css = '*[id^=blah*d]{display:inline-block;}';
+        $this->assertSame($css, $optimiser->process($css));
+
+        $css = '.test{-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box;}';
+        $this->assertSame($css, $optimiser->process($css));
+
+        $css = '#test{box-shadow:inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 1px 2px rgba(0, 0, 0, 0.05);}';
+        $this->assertSame($css, $optimiser->process($css));
+    }
+
+    /**
+     * Test browser hacks here.
+     */
+    public function test_browser_hacks() {
+        $optimiser = $this->get_optimiser();
+
+        $css = '#test{*zoom:1;}';
+        $this->assertSame($css, $optimiser->process($css));
+
+        $css = '.test{width:75%;*width:76%;}';
+        $this->assertSame($css, $optimiser->process($css));
+
+        $css = '#test{*zoom:1;*display:inline;}';
+        $this->assertSame($css, $optimiser->process($css));
+
+        $css = '.test{width:75%;*width:76%;width:76%}';
+        $this->assertSame('.test{width:76%;*width:76%;}', $optimiser->process($css));
+
+        $css = '.test{width:75%;*width:76%;*width:75%}';
+        $this->assertSame('.test{width:75%;*width:75%;}', $optimiser->process($css));
     }
 }

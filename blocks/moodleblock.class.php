@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -18,8 +17,7 @@
 /**
  * This file contains the parent class for moodle blocks, block_base.
  *
- * @package    core
- * @subpackage block
+ * @package    core_block
  * @license    http://www.gnu.org/copyleft/gpl.html GNU Public License
  */
 
@@ -43,7 +41,7 @@ define('BLOCK_TYPE_TREE',    3);
  * Class for describing a moodle block, all Moodle blocks derive from this class
  *
  * @author Jon Papaioannou
- * @package blocks
+ * @package core_block
  */
 class block_base {
 
@@ -416,6 +414,9 @@ class block_base {
             'class' => 'block_' . $this->name(). '  block',
             'role' => $this->get_aria_role()
         );
+        if ($this->hide_header()) {
+            $attributes['class'] .= ' no-header';
+        }
         if ($this->instance_can_be_docked() && get_user_preferences('docked_block_instance_'.$this->instance->id, 0)) {
             $attributes['class'] .= ' dock_on_load';
         }
@@ -753,7 +754,7 @@ EOD;
  * $this->content->icons, instead of $this->content->text.
  *
  * @author Jon Papaioannou
- * @package blocks
+ * @package core_block
  */
 
 class block_list extends block_base {
@@ -799,7 +800,7 @@ class block_list extends block_base {
  * not in a separate array.
  *
  * @author Alan Trick
- * @package blocks
+ * @package core_block
  * @internal this extends block_list so we get is_empty() for free
  */
 class block_tree extends block_list {

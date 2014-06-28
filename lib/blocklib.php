@@ -394,12 +394,30 @@ class block_manager {
     /**
      * Add a region to a page
      *
-     * @param string $region add a named region where blocks may appear on the
-     * current page. This is an internal name, like 'side-pre', not a string to
-     * display in the UI.
+     * @param string $region add a named region where blocks may appear on the current page.
+     *      This is an internal name, like 'side-pre', not a string to display in the UI.
+     * @param bool $custom True if this is a custom block region, being added by the page rather than the theme layout.
      */
-    public function add_region($region) {
+    public function add_region($region, $custom = true) {
+        global $SESSION;
         $this->check_not_yet_loaded();
+        if ($custom) {
+            if (array_key_exists($region, $this->regions)) {
+                // This here is EXACTLY why we should not be adding block regions into a page. It should
+                // ALWAYS be done in a theme layout.
+                debugging('A custom region conflicts with a block region in the theme.', DEBUG_DEVELOPER);
+            }
+            // We need to register this custom region against the page type being used.
+            // This allows us to check, when performing block actions, that unrecognised regions can be worked with.
+            $type = $this->page->pagetype;
+            if (!isset($SESSION->custom_block_regions)) {
+                $SESSION->custom_block_regions = array($type => array($region));
+            } else if (!isset($SESSION->custom_block_regions[$type])) {
+                $SESSION->custom_block_regions[$type] = array($region);
+            } else if (!in_array($region, $SESSION->custom_block_regions[$type])) {
+                $SESSION->custom_block_regions[$type][] = $region;
+            }
+        }
         $this->regions[$region] = 1;
     }
 
@@ -409,9 +427,23 @@ class block_manager {
      *
      * @param array $regions this utility method calls add_region for each array element.
      */
-    public function add_regions($regions) {
+    public function add_regions($regions, $custom = true) {
         foreach ($regions as $region) {
-            $this->add_region($region);
+            $this->add_region($region, $custom);
+        }
+    }
+
+    /**
+     * Finds custom block regions associated with a page type and registers them with this block manager.
+     *
+     * @param string $pagetype
+     */
+    public function add_custom_regions_for_pagetype($pagetype) {
+        global $SESSION;
+        if (isset($SESSION->custom_block_regions[$pagetype])) {
+            foreach ($SESSION->custom_block_regions[$pagetype] as $customregion) {
+                $this->add_region($customregion, false);
+            }
         }
     }
 
@@ -449,6 +481,7 @@ class block_manager {
         if (!isset($bc->attributes['data-block'])) {
             $bc->attributes['data-block'] = '_fake';
         }
+        $bc->attributes['class'] .= ' block_fake';
         $this->extracontent[$region][] = $bc;
     }
 
@@ -486,7 +519,11 @@ class block_manager {
 
         $this->check_is_loaded();
         $this->ensure_content_created($region, $output);
-        foreach($this->visibleblockcontent[$region] as $instance) {
+        if (!$this->region_has_content($region, $output)) {
+            // If the region has no content then nothing is docked at all of course.
+            return false;
+        }
+        foreach ($this->visibleblockcontent[$region] as $instance) {
             if (!empty($instance->content) && !get_user_preferences('docked_block_instance_'.$instance->blockinstanceid, 0)) {
                 return false;
             }
@@ -746,7 +783,7 @@ class block_manager {
      * @param string $subpagepattern optional. Passed to @see add_block()
      */
     public function add_blocks($blocks, $pagetypepattern = NULL, $subpagepattern = NULL, $showinsubcontexts=false, $weight=0) {
-        $this->add_regions(array_keys($blocks));
+        $this->add_regions(array_keys($blocks), false);
         foreach ($blocks as $region => $regionblocks) {
             $weight = 0;
             foreach ($regionblocks as $blockname) {
@@ -998,7 +1035,7 @@ class block_manager {
      *
      * @param string $region The name of the region to check
      */
-    protected function ensure_content_created($region, $output) {
+    public function ensure_content_created($region, $output) {
         $this->ensure_instances_exist($region);
         if (!array_key_exists($region, $this->visibleblockcontent)) {
             $contents = array();
@@ -1050,24 +1087,13 @@ class block_manager {
         if ($this->page->user_can_edit_blocks() || $block->user_can_edit()) {
             // Edit config icon - always show - needed for positioning UI.
             $str = new lang_string('configureblock', 'block', $blocktitle);
-            $controls[] = new action_menu_link_primary(
+            $controls[] = new action_menu_link_secondary(
                 new moodle_url($actionurl, array('bui_editid' => $block->instance->id)),
                 new pix_icon('t/edit', $str, 'moodle', array('class' => 'iconsmall', 'title' => '')),
                 $str,
                 array('class' => 'editing_edit')
             );
 
-        }
-
-        if ($this->user_can_delete_block($block)) {
-            // Delete icon.
-            $str = new lang_string('deleteblock', 'block', $blocktitle);
-            $controls[] = new action_menu_link_secondary(
-                new moodle_url($actionurl, array('bui_deleteid' => $block->instance->id)),
-                new pix_icon('t/delete', $str, 'moodle', array('class' => 'iconsmall', 'title' => '')),
-                $str,
-                array('class' => 'editing_delete')
-            );
         }
 
         if ($this->page->user_can_edit_blocks() && $block->instance_can_be_hidden()) {
@@ -1083,7 +1109,7 @@ class block_manager {
                 $icon = new pix_icon('t/show', $str, 'moodle', array('class' => 'iconsmall', 'title' => ''));
                 $attributes = array('class' => 'editing_show');
             }
-            $controls[] = new action_menu_link_primary($url, $icon, $str, $attributes);
+            $controls[] = new action_menu_link_secondary($url, $icon, $str, $attributes);
         }
 
         // Assign roles icon.
@@ -1105,6 +1131,18 @@ class block_manager {
                 array('class' => 'editing_roles')
             );
         }
+
+        if ($this->user_can_delete_block($block)) {
+            // Delete icon.
+            $str = new lang_string('deleteblock', 'block', $blocktitle);
+            $controls[] = new action_menu_link_secondary(
+                new moodle_url($actionurl, array('bui_deleteid' => $block->instance->id)),
+                new pix_icon('t/delete', $str, 'moodle', array('class' => 'iconsmall', 'title' => '')),
+                $str,
+                array('class' => 'editing_delete')
+            );
+        }
+
         return $controls;
     }
 

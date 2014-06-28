@@ -131,9 +131,9 @@ class cachestore_memcache extends cache_store implements cache_is_configurable {
 
         $this->connection = new Memcache;
         foreach ($this->servers as $server) {
-            $this->connection->addServer($server[0], $server[1], true, $server[2]);
-            // Test the connection to this server.
+            $this->connection->addServer($server[0], (int) $server[1], true, (int) $server[2]);
         }
+        // Test the connection to the pool of servers.
         $this->isready = @$this->connection->set($this->parse_key('ping'), 'ping', MEMCACHE_COMPRESSED, 1);
     }
 
@@ -216,7 +216,7 @@ class cachestore_memcache extends cache_store implements cache_is_configurable {
      * @return int
      */
     public static function get_supported_modes(array $configuration = array()) {
-        return self::MODE_APPLICATION + self::MODE_SESSION;
+        return self::MODE_APPLICATION;
     }
 
     /**
@@ -350,7 +350,12 @@ class cachestore_memcache extends cache_store implements cache_is_configurable {
         $lines = explode("\n", $data->servers);
         $servers = array();
         foreach ($lines as $line) {
-            $line = trim($line, ':');
+            // Trim surrounding colons and default whitespace.
+            $line = trim(trim($line), ":");
+            // Skip blank lines.
+            if ($line === '') {
+                continue;
+            }
             $servers[] = explode(':', $line, 3);
         }
         return array(
@@ -418,6 +423,27 @@ class cachestore_memcache extends cache_store implements cache_is_configurable {
 
         $configuration = array();
         $configuration['servers'] = explode("\n", $config->testservers);
+
+        $store = new cachestore_memcache('Test memcache', $configuration);
+        $store->initialise($definition);
+
+        return $store;
+    }
+
+    /**
+     * Creates a test instance for unit tests if possible.
+     * @param cache_definition $definition
+     * @return bool|cachestore_memcache
+     */
+    public static function initialise_unit_test_instance(cache_definition $definition) {
+        if (!self::are_requirements_met()) {
+            return false;
+        }
+        if (!defined('TEST_CACHESTORE_MEMCACHE_TESTSERVERS')) {
+            return false;
+        }
+        $configuration = array();
+        $configuration['servers'] = explode("\n", TEST_CACHESTORE_MEMCACHE_TESTSERVERS);
 
         $store = new cachestore_memcache('Test memcache', $configuration);
         $store->initialise($definition);

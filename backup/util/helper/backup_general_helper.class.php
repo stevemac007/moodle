@@ -232,7 +232,7 @@ abstract class backup_general_helper extends backup_helper {
      *
      * @param string $filepath absolute path to the MBZ file.
      * @return stdClass containing information.
-     * @since 2.4
+     * @since Moodle 2.4
      */
     public static function get_backup_information_from_mbz($filepath) {
         global $CFG;
@@ -244,6 +244,7 @@ abstract class backup_general_helper extends backup_helper {
         $tmpname = 'info_from_mbz_' . time() . '_' . random_string(4);
         $tmpdir = $CFG->tempdir . '/backup/' . $tmpname;
         $fp = get_file_packer('application/vnd.moodle.backup');
+
         $extracted = $fp->extract_to_pathname($filepath, $tmpdir, array('moodle_backup.xml'));
         $moodlefile =  $tmpdir . '/' . 'moodle_backup.xml';
         if (!$extracted || !is_readable($moodlefile)) {

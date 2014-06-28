@@ -30,19 +30,28 @@ if (isset($userdata->status)) {
 if (!isset($currentorg)) {
     $currentorg = '';
 }
+
+// If SCORM 1.2 standard mode is disabled allow higher datamodel limits.
+if (intval(get_config("scorm", "scorm12standard"))) {
+    $cmistring256 = '^[\\u0000-\\uFFFF]{0,255}$';
+    $cmistring4096 = '^[\\u0000-\\uFFFF]{0,4096}$';
+} else {
+    $cmistring256 = '^[\\u0000-\\uFFFF]{0,64000}$';
+    $cmistring4096 = $cmistring256;
+}
 ?>
 //
 // SCORM 1.2 API Implementation
 //
 function SCORMapi1_2() {
     // Standard Data Type Definition
-    CMIString256 = '^[\\u0000-\\uffff]{0,255}$';
-    CMIString4096 = '^[\\u0000-\\uffff]{0,4096}$';
+    CMIString256 = '<?php echo $cmistring256 ?>';
+    CMIString4096 = '<?php echo $cmistring4096 ?>';
     CMITime = '^([0-2]{1}[0-9]{1}):([0-5]{1}[0-9]{1}):([0-5]{1}[0-9]{1})(\.[0-9]{1,2})?$';
     CMITimespan = '^([0-9]{2,4}):([0-9]{2}):([0-9]{2})(\.[0-9]{1,2})?$';
     CMIInteger = '^\\d+$';
     CMISInteger = '^-?([0-9]+)$';
-    CMIDecimal = '^-?([0-9]{0,3})(\.[0-9]{1,2})?$';
+    CMIDecimal = '^-?([0-9]{0,3})(\.[0-9]*)?$';
     CMIIdentifier = '^[\\u0021-\\u007E]{0,255}$';
     CMIFeedback = CMIString256; // This must be redefined
     CMIIndex = '[._](\\d+).';
@@ -51,7 +60,7 @@ function SCORMapi1_2() {
     CMIStatus2 = '^passed$|^completed$|^failed$|^incomplete$|^browsed$|^not attempted$';
     CMIExit = '^time-out$|^suspend$|^logout$|^$';
     CMIType = '^true-false$|^choice$|^fill-in$|^matching$|^performance$|^sequencing$|^likert$|^numeric$';
-    CMIResult = '^correct$|^wrong$|^unanticipated$|^neutral$|^([0-9]{0,3})?(\.[0-9]{1,2})?$';
+    CMIResult = '^correct$|^wrong$|^unanticipated$|^neutral$|^([0-9]{0,3})?(\.[0-9]*)?$';
     NAVEvent = '^previous$|^continue$';
     // Children lists
     cmi_children = 'core,suspend_data,launch_data,comments,objectives,student_data,student_preference,interactions';

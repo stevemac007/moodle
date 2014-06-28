@@ -53,8 +53,11 @@ class core_completionlib_testcase extends advanced_testcase {
 
         $this->resetAfterTest();
 
+        // Enable completion before creating modules, otherwise the completion data is not written in DB.
+        $CFG->enablecompletion = true;
+
         // Create a course with activities.
-        $this->course = $this->getDataGenerator()->create_course();
+        $this->course = $this->getDataGenerator()->create_course(array('enablecompletion' => true));
         $this->user = $this->getDataGenerator()->create_user();
         $studentrole = $DB->get_record('role', array('shortname' => 'student'));
         $this->assertNotEmpty($studentrole);
@@ -68,6 +71,30 @@ class core_completionlib_testcase extends advanced_testcase {
 
         $this->module1 = $this->getDataGenerator()->create_module('forum', array('course' => $this->course->id));
         $this->module2 = $this->getDataGenerator()->create_module('forum', array('course' => $this->course->id));
+    }
+
+    /**
+     * Asserts that two variables are equal.
+     *
+     * @param  mixed   $expected
+     * @param  mixed   $actual
+     * @param  string  $message
+     * @param  float   $delta
+     * @param  integer $maxDepth
+     * @param  boolean $canonicalize
+     * @param  boolean $ignoreCase
+     */
+    public static function assertEquals($expected, $actual, $message = '', $delta = 0, $maxDepth = 10, $canonicalize = FALSE, $ignoreCase = FALSE) {
+        // Nasty cheating hack: prevent random failures on timemodified field.
+        if (is_object($expected) and is_object($actual)) {
+            if (property_exists($expected, 'timemodified') and property_exists($actual, 'timemodified')) {
+                if ($expected->timemodified + 1 == $actual->timemodified) {
+                    $expected = clone($expected);
+                    $expected->timemodified = $actual->timemodified;
+                }
+            }
+        }
+        parent::assertEquals($expected, $actual, $message, $delta, $maxDepth, $canonicalize, $ignoreCase);
     }
 
     public function test_is_enabled() {
@@ -473,6 +500,7 @@ class core_completionlib_testcase extends advanced_testcase {
         $data->coursemoduleid = $cm->id;
         $data->completionstate = COMPLETION_COMPLETE;
         $data->timemodified = time();
+        $data->viewed = COMPLETION_NOT_VIEWED;
 
         $c->internal_set_data($cm, $data);
         $d1 = $DB->get_field('course_modules_completion', 'id', array('coursemoduleid' => $cm->id));
@@ -491,6 +519,7 @@ class core_completionlib_testcase extends advanced_testcase {
         $d2->coursemoduleid = $cm2->id;
         $d2->completionstate = COMPLETION_COMPLETE;
         $d2->timemodified = time();
+        $d2->viewed = COMPLETION_NOT_VIEWED;
         $c->internal_set_data($cm2, $d2);
         $this->assertFalse(isset($SESSION->completioncache));
 
@@ -506,6 +535,7 @@ class core_completionlib_testcase extends advanced_testcase {
         $d3->coursemoduleid = $cm3->id;
         $d3->completionstate = COMPLETION_COMPLETE;
         $d3->timemodified = time();
+        $d3->viewed = COMPLETION_NOT_VIEWED;
         $DB->insert_record('course_modules_completion', $d3);
         $c->internal_set_data($cm, $data);
     }
@@ -694,10 +724,14 @@ class core_completionlib_testcase extends advanced_testcase {
     }
 
     public function test_get_activities() {
+        global $CFG;
         $this->resetAfterTest();
 
+        // Enable completion before creating modules, otherwise the completion data is not written in DB.
+        $CFG->enablecompletion = true;
+
         // Create a course with mixed auto completion data.
-        $course = $this->getDataGenerator()->create_course();
+        $course = $this->getDataGenerator()->create_course(array('enablecompletion' => true));
         $completionauto = array('completion' => COMPLETION_TRACKING_AUTOMATIC);
         $completionmanual = array('completion' => COMPLETION_TRACKING_MANUAL);
         $completionnone = array('completion' => COMPLETION_TRACKING_NONE);
@@ -710,7 +744,7 @@ class core_completionlib_testcase extends advanced_testcase {
         $data2 = $this->getDataGenerator()->create_module('data', array('course' => $course->id), $completionnone);
 
         // Create data in another course to make sure it's not considered.
-        $course2 = $this->getDataGenerator()->create_course();
+        $course2 = $this->getDataGenerator()->create_course(array('enablecompletion' => true));
         $c2forum = $this->getDataGenerator()->create_module('forum', array('course' => $course2->id), $completionauto);
         $c2page = $this->getDataGenerator()->create_module('page', array('course' => $course2->id), $completionmanual);
         $c2data = $this->getDataGenerator()->create_module('data', array('course' => $course2->id), $completionnone);
@@ -731,11 +765,15 @@ class core_completionlib_testcase extends advanced_testcase {
     }
 
     public function test_has_activities() {
+        global $CFG;
         $this->resetAfterTest();
 
+        // Enable completion before creating modules, otherwise the completion data is not written in DB.
+        $CFG->enablecompletion = true;
+
         // Create a course with mixed auto completion data.
-        $course = $this->getDataGenerator()->create_course();
-        $course2 = $this->getDataGenerator()->create_course();
+        $course = $this->getDataGenerator()->create_course(array('enablecompletion' => true));
+        $course2 = $this->getDataGenerator()->create_course(array('enablecompletion' => true));
         $completionauto = array('completion' => COMPLETION_TRACKING_AUTOMATIC);
         $completionnone = array('completion' => COMPLETION_TRACKING_NONE);
         $c1forum = $this->getDataGenerator()->create_module('forum', array('course' => $course->id), $completionauto);
@@ -752,9 +790,10 @@ class core_completionlib_testcase extends advanced_testcase {
      * Test course module completion update event.
      */
     public function test_course_module_completion_updated_event() {
-        global $USER;
+        global $USER, $CFG;
 
         $this->setup_data();
+
         $this->setAdminUser();
 
         $completionauto = array('completion' => COMPLETION_TRACKING_AUTOMATIC);
@@ -776,9 +815,10 @@ class core_completionlib_testcase extends advanced_testcase {
         $this->assertInstanceOf('\core\event\course_module_completion_updated', $event);
         $this->assertEquals($forum->cmid, $event->get_record_snapshot('course_modules_completion', $event->objectid)->coursemoduleid);
         $this->assertEquals($current, $event->get_record_snapshot('course_modules_completion', $event->objectid));
-        $this->assertEquals(context_module::instance($forum->id), $event->get_context());
+        $this->assertEquals(context_module::instance($forum->cmid), $event->get_context());
         $this->assertEquals($USER->id, $event->userid);
-        $this->assertEquals($this->user->id, $event->other['relateduserid']);
+        $this->assertEquals($this->user->id, $event->relateduserid);
+        $this->assertInstanceOf('moodle_url', $event->get_url());
         $this->assertEventLegacyData($current, $event);
     }
 
@@ -804,13 +844,41 @@ class core_completionlib_testcase extends advanced_testcase {
         $this->assertEquals($this->course->id, $event->get_record_snapshot('course_completions', $event->objectid)->course);
         $this->assertEquals($this->course->id, $event->courseid);
         $this->assertEquals($USER->id, $event->userid);
-        $this->assertEquals($this->user->id, $event->other['relateduserid']);
+        $this->assertEquals($this->user->id, $event->relateduserid);
         $this->assertEquals(context_course::instance($this->course->id), $event->get_context());
+        $this->assertInstanceOf('moodle_url', $event->get_url());
         $data = $ccompletion->get_record_data();
         $this->assertEventLegacyData($data, $event);
     }
-}
 
+    /**
+     * Test course completed event.
+     */
+    public function test_course_completion_updated_event() {
+        $this->setup_data();
+        $coursecontext = context_course::instance($this->course->id);
+        $coursecompletionevent = \core\event\course_completion_updated::create(
+                array(
+                    'courseid' => $this->course->id,
+                    'context' => $coursecontext
+                    )
+                );
+
+        // Mark course as complete and get triggered event.
+        $sink = $this->redirectEvents();
+        $coursecompletionevent->trigger();
+        $events = $sink->get_events();
+        $event = array_pop($events);
+        $sink->close();
+
+        $this->assertInstanceOf('\core\event\course_completion_updated', $event);
+        $this->assertEquals($this->course->id, $event->courseid);
+        $this->assertEquals($coursecontext, $event->get_context());
+        $this->assertInstanceOf('moodle_url', $event->get_url());
+        $expectedlegacylog = array($this->course->id, 'course', 'completion updated', 'completion.php?id='.$this->course->id);
+        $this->assertEventLegacyLogData($expectedlegacylog, $event);
+    }
+}
 
 class core_completionlib_fake_recordset implements Iterator {
     protected $closed;

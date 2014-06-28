@@ -40,7 +40,7 @@
  *
  * TODO: Finish phpdocs
  */
-class backup_controller extends backup implements loggable {
+class backup_controller extends base_controller {
 
     protected $backupid; // Unique identificator for this backup
 
@@ -62,7 +62,6 @@ class backup_controller extends backup implements loggable {
     protected $executiontime; // epoch time when we want the backup to be executed (requires cron to run)
 
     protected $destination; // Destination chain object (fs_moodle, fs_os, db, email...)
-    protected $logger;      // Logging chain object (moodle, inline, fs, db, syslog)
 
     protected $checksum; // Cache @checksumable results for lighter @is_checksum_correct() uses
 
@@ -108,6 +107,10 @@ class backup_controller extends backup implements loggable {
 
         // Default logger chain (based on interactive/execution)
         $this->logger = backup_factory::get_logger_chain($this->interactive, $this->execution, $this->backupid);
+
+        // By default there is no progress reporter. Interfaces that wish to
+        // display progress must set it.
+        $this->progress = new \core\progress\null();
 
         // Instantiate the output_controller singleton and active it if interactive and inmediate
         $oc = output_controller::get_instance();
@@ -298,17 +301,13 @@ class backup_controller extends backup implements loggable {
         return $this->plan;
     }
 
-    public function get_logger() {
-        return $this->logger;
-    }
-
     /**
      * Executes the backup
      * @return void Throws and exception of completes
      */
     public function execute_plan() {
         // Basic/initial prevention against time/memory limits
-        set_time_limit(1 * 60 * 60); // 1 hour for 1 course initially granted
+        core_php_time_limit::raise(1 * 60 * 60); // 1 hour for 1 course initially granted
         raise_memory_limit(MEMORY_EXTRA);
         // If this is not a course backup, inform the plan we are not
         // including all the activities for sure. This will affect any
@@ -323,10 +322,6 @@ class backup_controller extends backup implements loggable {
 
     public function get_results() {
         return $this->plan->get_results();
-    }
-
-    public function log($message, $level, $a = null, $depth = null, $display = false) {
-        backup_helper::log($message, $level, $a, $depth, $display, $this->logger);
     }
 
     /**

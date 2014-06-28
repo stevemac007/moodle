@@ -351,7 +351,7 @@ class qformat_webct extends qformat_default {
 
         foreach ($lines as $line) {
             $nlinecounter++;
-            $line = textlib::convert($line, 'windows-1252', 'utf-8');
+            $line = core_text::convert($line, 'windows-1252', 'utf-8');
             // Processing multiples lines strings.
 
             if (isset($questiontext) and is_string($questiontext)) {
@@ -634,8 +634,10 @@ class qformat_webct extends qformat_default {
                 $question = $this->defaultquestion();
                 $question->qtype = 'essay';
                 $question->responseformat = 'editor';
+                $question->responserequired = 1;
                 $question->responsefieldlines = 15;
                 $question->attachments = 0;
+                $question->attachmentsrequired = 0;
                 $question->graderinfo = array(
                         'text' => '',
                         'format' => FORMAT_HTML,

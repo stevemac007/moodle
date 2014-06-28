@@ -17,7 +17,7 @@
 /**
  * This plugin is used to access coursefiles repository
  *
- * @since 2.0
+ * @since Moodle 2.0
  * @package    repository_coursefiles
  * @copyright  2010 Dongsheng Cai {@link http://dongsheng.org}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -27,7 +27,7 @@ require_once($CFG->dirroot . '/repository/lib.php');
 /**
  * repository_coursefiles class is used to browse course files
  *
- * @since 2.0
+ * @since Moodle 2.0
  * @package    repository_coursefiles
  * @copyright  2010 Dongsheng Cai {@link http://dongsheng.org}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -180,10 +180,15 @@ class repository_coursefiles extends repository {
         return parent::is_visible();
     }
 
+    /**
+     * Return the repository name.
+     *
+     * @return string
+     */
     public function get_name() {
-        list($context, $course, $cm) = get_context_info_array($this->context->id);
-        if (!empty($course)) {
-            return get_string('courselegacyfiles') . format_string($course->shortname, true, array('context' => $context->get_course_context(true)));
+        $context = $this->context->get_course_context(false);
+        if ($context) {
+            return get_string('courselegacyfilesofcourse', 'moodle', $context->get_context_name(false, true));
         } else {
             return get_string('courselegacyfiles');
         }
@@ -204,17 +209,6 @@ class repository_coursefiles extends repository {
      */
     public function has_moodle_files() {
         return true;
-    }
-
-    /**
-     * Return reference file life time
-     *
-     * @param string $ref
-     * @return int
-     */
-    public function get_reference_file_lifetime($ref) {
-        // this should be realtime
-        return 0;
     }
 
     /**

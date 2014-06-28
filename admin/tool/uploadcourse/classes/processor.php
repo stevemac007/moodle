@@ -194,6 +194,10 @@ class tool_uploadcourse_processor {
         $deleted = 0;
         $errors = 0;
 
+        // We will most certainly need extra time and memory to process big files.
+        core_php_time_limit::raise();
+        raise_memory_limit(MEMORY_EXTRA);
+
         // Loop over the CSV lines.
         while ($line = $this->cir->next()) {
             $this->linenb++;
@@ -223,8 +227,6 @@ class tool_uploadcourse_processor {
 
         $tracker->finish();
         $tracker->results($total, $created, $updated, $deleted, $errors);
-
-        $this->remove_restore_content();
     }
 
     /**
@@ -332,6 +334,10 @@ class tool_uploadcourse_processor {
         }
         $tracker->start();
 
+        // We might need extra time and memory depending on the number of rows to preview.
+        core_php_time_limit::raise();
+        raise_memory_limit(MEMORY_EXTRA);
+
         // Loop over the CSV lines.
         $preview = array();
         while (($line = $this->cir->next()) && $rows > $this->linenb) {
@@ -349,18 +355,8 @@ class tool_uploadcourse_processor {
         }
 
         $tracker->finish();
-        $this->remove_restore_content();
 
         return $preview;
-    }
-
-    /**
-     * Delete the restore object.
-     *
-     * @return void
-     */
-    protected function remove_restore_content() {
-        tool_uploadcourse_helper::clean_restore_content();
     }
 
     /**

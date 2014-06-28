@@ -178,11 +178,21 @@ class core_text {
             return '';
         }
 
-        if ($toCS === 'utf-8' and $fromCS === 'utf-8') {
-            return fix_utf8($text);
+        if ($fromCS === 'utf-8') {
+            $text = fix_utf8($text);
+            if ($toCS === 'utf-8') {
+                return $text;
+            }
         }
 
-        $result = iconv($fromCS, $toCS.'//TRANSLIT', $text);
+        if ($toCS === 'ascii') {
+            // Try to normalize the conversion a bit.
+            $text = self::specialtoascii($text, $fromCS);
+        }
+
+        // Prevent any error notices, do not use //IGNORE so that we get
+        // consistent result from Typo3 if iconv fails.
+        $result = @iconv($fromCS, $toCS.'//TRANSLIT', $text);
 
         if ($result === false or $result === '') {
             // note: iconv is prone to return empty string when invalid char encountered, or false if encoding unsupported
@@ -236,6 +246,36 @@ class core_text {
         error_reporting($oldlevel);
 
         return $result;
+    }
+
+    /**
+     * Finds the last occurrence of a character in a string within another.
+     * UTF-8 ONLY safe mb_strrchr().
+     *
+     * @param string $haystack The string from which to get the last occurrence of needle.
+     * @param string $needle The string to find in haystack.
+     * @param boolean $part If true, returns the portion before needle, else return the portion after (including needle).
+     * @return string|false False when not found.
+     * @since Moodle 2.4.6, 2.5.2, 2.6
+     */
+    public static function strrchr($haystack, $needle, $part = false) {
+
+        if (function_exists('mb_strrchr')) {
+            return mb_strrchr($haystack, $needle, $part, 'UTF-8');
+        }
+
+        $pos = self::strrpos($haystack, $needle);
+        if ($pos === false) {
+            return false;
+        }
+
+        $length = null;
+        if ($part) {
+            $length = $pos;
+            $pos = 0;
+        }
+
+        return self::substr($haystack, $pos, $length, 'utf-8');
     }
 
     /**
@@ -331,7 +371,7 @@ class core_text {
      * @return int the numeric position of the last occurrence of needle in haystack
      */
     public static function strrpos($haystack, $needle) {
-        if (function_exists('mb_strpos')) {
+        if (function_exists('mb_strrpos')) {
             return mb_strrpos($haystack, $needle, null, 'UTF-8');
         } else {
             return iconv_strrpos($haystack, $needle, 'UTF-8');
@@ -654,23 +694,5 @@ class core_text {
             }
         }
         return implode(' ', $words);
-    }
-}
-
-/**
- * Legacy tectlib.
- * @deprecated since 2.6, use core_text:: instead.
- */
-class textlib extends core_text {
-    /**
-     * Locale aware sorting, the key associations are kept, values are sorted alphabetically.
-     *
-     * @param array $arr array to be sorted (reference)
-     * @param int $sortflag One of Collator::SORT_REGULAR, Collator::SORT_NUMERIC, Collator::SORT_STRING
-     * @return void modifies parameter
-     */
-    public static function asort(array &$arr, $sortflag = null) {
-        debugging('textlib::asort has been superseeded by collatorlib::asort please upgrade your code to use that', DEBUG_DEVELOPER);
-        collatorlib::asort($arr, $sortflag);
     }
 }

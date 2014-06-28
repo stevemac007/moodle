@@ -75,11 +75,16 @@ class repository_skydrive extends repository {
      * @return array of login options
      */
     public function print_login() {
-        $popup = new stdClass();
-        $popup->type = 'popup';
         $url = $this->skydrive->get_login_url();
-        $popup->url = $url->out(false);
-        return array('login' => array($popup));
+
+        if ($this->options['ajax']) {
+            $popup = new stdClass();
+            $popup->type = 'popup';
+            $popup->url = $url->out(false);
+            return array('login' => array($popup));
+        } else {
+            echo '<a target="_blank" href="'.$url->out(false).'">'.get_string('login', 'repository').'</a>';
+        }
     }
 
     /**
@@ -96,7 +101,11 @@ class repository_skydrive extends repository {
         $ret['dynload'] = true;
         $ret['nosearch'] = true;
         $ret['manage'] = 'https://skydrive.live.com/';
-        $ret['list'] = $this->skydrive->get_file_list($path);
+
+        $fileslist = $this->skydrive->get_file_list($path);
+        // Filter list for accepted types. Hopefully this will be done by core some day.
+        $fileslist = array_filter($fileslist, array($this, 'filter'));
+        $ret['list'] = $fileslist;
 
         // Generate path bar, always start with the plugin name.
         $ret['path']   = array();

@@ -40,8 +40,8 @@ class core_badges_observer {
             require_once($CFG->dirroot.'/lib/badgeslib.php');
 
             $eventdata = $event->get_record_snapshot('course_modules_completion', $event->objectid);
-            $userid = $event->other['relateduserid'];
-            $mod = $eventdata->coursemoduleid;
+            $userid = $event->relateduserid;
+            $mod = $event->contextinstanceid;
 
             if ($eventdata->completionstate == COMPLETION_COMPLETE
                 || $eventdata->completionstate == COMPLETION_COMPLETE_PASS
@@ -72,7 +72,7 @@ class core_badges_observer {
     /**
      * Triggered when 'course_completed' event is triggered.
      *
-     * @param   \core\event\course_completed $event
+     * @param \core\event\course_completed $event
      */
     public static function course_criteria_review(\core\event\course_completed $event) {
         global $DB, $CFG;
@@ -81,7 +81,7 @@ class core_badges_observer {
             require_once($CFG->dirroot.'/lib/badgeslib.php');
 
             $eventdata = $event->get_record_snapshot('course_completions', $event->objectid);
-            $userid = $event->other['relateduserid'];
+            $userid = $event->relateduserid;
             $courseid = $event->courseid;
 
             // Need to take into account that course can be a part of course_completion and courseset_completion criteria.
@@ -95,6 +95,38 @@ class core_badges_observer {
 
                     if ($badge->criteria[$crit->criteriatype]->review($userid)) {
                         $badge->criteria[$crit->criteriatype]->mark_complete($userid);
+
+                        if ($badge->criteria[BADGE_CRITERIA_TYPE_OVERALL]->review($userid)) {
+                            $badge->criteria[BADGE_CRITERIA_TYPE_OVERALL]->mark_complete($userid);
+                            $badge->issue($userid);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Triggered when 'user_updated' event happens.
+     *
+     * @param \core\event\user_updated $event event generated when user profile is updated.
+     */
+    public static function profile_criteria_review(\core\event\user_updated $event) {
+        global $DB, $CFG;
+
+        if (!empty($CFG->enablebadges)) {
+            require_once($CFG->dirroot.'/lib/badgeslib.php');
+            $userid = $event->objectid;
+
+            if ($rs = $DB->get_records('badge_criteria', array('criteriatype' => BADGE_CRITERIA_TYPE_PROFILE))) {
+                foreach ($rs as $r) {
+                    $badge = new badge($r->badgeid);
+                    if (!$badge->is_active() || $badge->is_issued($userid)) {
+                        continue;
+                    }
+
+                    if ($badge->criteria[BADGE_CRITERIA_TYPE_PROFILE]->review($userid)) {
+                        $badge->criteria[BADGE_CRITERIA_TYPE_PROFILE]->mark_complete($userid);
 
                         if ($badge->criteria[BADGE_CRITERIA_TYPE_OVERALL]->review($userid)) {
                             $badge->criteria[BADGE_CRITERIA_TYPE_OVERALL]->mark_complete($userid);

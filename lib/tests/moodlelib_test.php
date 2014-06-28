@@ -30,57 +30,6 @@ class core_moodlelib_testcase extends advanced_testcase {
 
     public static $includecoverage = array('lib/moodlelib.php');
 
-    protected $user_agents = array(
-        'MSIE' => array(
-            '5.0' => array('Windows 98' => 'Mozilla/4.0 (compatible; MSIE 5.00; Windows 98)'),
-            '5.5' => array('Windows 2000' => 'Mozilla/4.0 (compatible; MSIE 5.5; Windows NT 5.0)'),
-            '6.0' => array('Windows XP SP2' => 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)'),
-            '7.0' => array('Windows XP SP2' => 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; YPC 3.0.1; .NET CLR 1.1.4322; .NET CLR 2.0.50727)'),
-            '8.0' => array('Windows Vista' => 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1; Trident/4.0; .NET CLR 2.0.50727; .NET CLR 1.1.4322; .NET CLR 3.0.04506.30; .NET CLR 3.0.04506.648)'),
-            '9.0' => array('Windows 7' => 'Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; WOW64; Trident/5.0)'),
-            '9.0i' => array('Windows 7' => 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.1; WOW64; Trident/5.0; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; Media Center PC 6.0)'),
-            '10.0' => array('Windows 8' => 'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.2; Trident/6.0; Touch)'),
-            '10.0i' => array('Windows 8' => 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.2; Trident/6.0; Touch; .NET4.0E; .NET4.0C; Tablet PC 2.0)'),
-        ),
-        'Firefox' => array(
-            '1.0.6'   => array('Windows XP' => 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.7.10) Gecko/20050716 Firefox/1.0.6'),
-            '1.5'     => array('Windows XP' => 'Mozilla/5.0 (Windows; U; Windows NT 5.1; nl; rv:1.8) Gecko/20051107 Firefox/1.5'),
-            '1.5.0.1' => array('Windows XP' => 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.8.0.1) Gecko/20060111 Firefox/1.5.0.1'),
-            '2.0'     => array('Windows XP' => 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.1) Gecko/20061204 Firefox/2.0.0.1',
-                               'Ubuntu Linux AMD64' => 'Mozilla/5.0 (X11; U; Linux x86_64; en-US; rv:1.8.1) Gecko/20060601 Firefox/2.0 (Ubuntu-edgy)'),
-            '3.0.6'   => array('SUSE' => 'Mozilla/5.0 (X11; U; Linux x86_64; en-US; rv:1.9.0.6) Gecko/2009012700 SUSE/3.0.6-1.4 Firefox/3.0.6'),
-            '3.6'     => array('Linux' => 'Mozilla/5.0 (X11; Linux i686; rv:2.0) Gecko/20100101 Firefox/3.6'),
-            '11.0'    => array('Windows' => 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:11.0) Gecko Firefox/11.0'),
-            '15.0a2'  => array('Windows' => 'Mozilla/5.0 (Windows NT 6.1; rv:15.0) Gecko/20120716 Firefox/15.0a2'),
-            '18.0'    => array('Mac OS X' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.8; rv:18.0) Gecko/18.0 Firefox/18.0'),
-        ),
-        'SeaMonkey' => array(
-            '2.0' => array('Windows' => 'Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1b3pre) Gecko/20081208 SeaMonkey/2.0'),
-            '2.1' => array('Linux' => 'Mozilla/5.0 (X11; Linux x86_64; rv:2.0.1) Gecko/20110609 Firefox/4.0.1 SeaMonkey/2.1'),
-            '2.3' => array('FreeBSD' => 'Mozilla/5.0 (X11; FreeBSD amd64; rv:6.0) Gecko/20110818 Firefox/6.0 SeaMonkey/2.3'),
-        ),
-        'Safari' => array(
-            '312' => array('Mac OS X' => 'Mozilla/5.0 (Macintosh; U; PPC Mac OS X; en-us) AppleWebKit/312.1 (KHTML, like Gecko) Safari/312'),
-            '412' => array('Mac OS X' => 'Mozilla/5.0 (Macintosh; U; PPC Mac OS X; en) AppleWebKit/412 (KHTML, like Gecko) Safari/412')
-        ),
-        'Safari iOS' => array(
-            '528' => array('iPhone' => 'Mozilla/5.0 (iPhone; U; CPU iPhone OS 3_1_2 like Mac OS X; cs-cz) AppleWebKit/528.18 (KHTML, like Gecko) Version/4.0 Mobile/7D11 Safari/528.16'),
-            '533' => array('iPad' => 'Mozilla/5.0 (iPad; U; CPU OS 4_2_1 like Mac OS X; en-us) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8C148 Safari/6533.18.5'),
-        ),
-        'WebKit Android' => array(
-            '525' => array('G1 Phone' => 'Mozilla/5.0 (Linux; U; Android 1.1; en-gb; dream) AppleWebKit/525.10+ (KHTML, like Gecko) Version/3.0.4 Mobile Safari/523.12.2 – G1 Phone'),
-            '530' => array('Nexus' => 'Mozilla/5.0 (Linux; U; Android 2.1; en-us; Nexus One Build/ERD62) AppleWebKit/530.17 (KHTML, like Gecko) Version/4.0 Mobile Safari/530.17 –Nexus'),
-        ),
-        'Chrome' => array(
-            '8' => array('Mac OS X' => 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_5; en-US) AppleWebKit/534.10 (KHTML, like Gecko) Chrome/8.0.552.215 Safari/534.10'),
-        ),
-        'Opera' => array(
-            '8.51' => array('Windows XP' => 'Opera/8.51 (Windows NT 5.1; U; en)'),
-            '9.0'  => array('Windows XP' => 'Opera/9.0 (Windows NT 5.1; U; en)',
-                'Debian Linux' => 'Opera/9.01 (X11; Linux i686; U; en)')
-        )
-    );
-
     /**
      * Define a local decimal separator.
      *
@@ -205,257 +154,6 @@ class core_moodlelib_testcase extends advanced_testcase {
         $this->assertFalse(address_in_subnet('123.123.123.123', ''));
     }
 
-    /**
-     * Modifies $_SERVER['HTTP_USER_AGENT'] manually to check if check_browser_version
-     * works as expected.
-     */
-    public function test_check_browser_version() {
-        $_SERVER['HTTP_USER_AGENT'] = $this->user_agents['Safari']['412']['Mac OS X'];
-        $this->assertTrue(check_browser_version('Safari'));
-        $this->assertTrue(check_browser_version('WebKit'));
-        $this->assertTrue(check_browser_version('Safari', '312'));
-        $this->assertFalse(check_browser_version('Safari', '500'));
-        $this->assertFalse(check_browser_version('Chrome'));
-        $this->assertFalse(check_browser_version('Safari iOS'));
-
-        $_SERVER['HTTP_USER_AGENT'] = $this->user_agents['Safari iOS']['528']['iPhone'];
-        $this->assertTrue(check_browser_version('Safari iOS'));
-        $this->assertTrue(check_browser_version('WebKit'));
-        $this->assertTrue(check_browser_version('Safari iOS', '527'));
-        $this->assertFalse(check_browser_version('Safari iOS', 590));
-        $this->assertFalse(check_browser_version('Safari', '312'));
-        $this->assertFalse(check_browser_version('Safari', '500'));
-        $this->assertFalse(check_browser_version('Chrome'));
-
-        $_SERVER['HTTP_USER_AGENT'] = $this->user_agents['WebKit Android']['530']['Nexus'];
-        $this->assertTrue(check_browser_version('WebKit'));
-        $this->assertTrue(check_browser_version('WebKit Android', '527'));
-        $this->assertFalse(check_browser_version('WebKit Android', 590));
-        $this->assertFalse(check_browser_version('Safari'));
-        $this->assertFalse(check_browser_version('Chrome'));
-
-        $_SERVER['HTTP_USER_AGENT'] = $this->user_agents['Chrome']['8']['Mac OS X'];
-        $this->assertTrue(check_browser_version('Chrome'));
-        $this->assertTrue(check_browser_version('WebKit'));
-        $this->assertTrue(check_browser_version('Chrome', 8));
-        $this->assertFalse(check_browser_version('Chrome', 10));
-        $this->assertFalse(check_browser_version('Safari', '1'));
-
-        $_SERVER['HTTP_USER_AGENT'] = $this->user_agents['Opera']['9.0']['Windows XP'];
-        $this->assertTrue(check_browser_version('Opera'));
-        $this->assertTrue(check_browser_version('Opera', '8.0'));
-        $this->assertFalse(check_browser_version('Opera', '10.0'));
-
-        $_SERVER['HTTP_USER_AGENT'] = $this->user_agents['MSIE']['6.0']['Windows XP SP2'];
-        $this->assertTrue(check_browser_version('MSIE'));
-        $this->assertTrue(check_browser_version('MSIE', '5.0'));
-        $this->assertFalse(check_browser_version('MSIE', '7.0'));
-
-        $_SERVER['HTTP_USER_AGENT'] = $this->user_agents['MSIE']['5.0']['Windows 98'];
-        $this->assertFalse(check_browser_version('MSIE'));
-        $this->assertTrue(check_browser_version('MSIE', 0));
-        $this->assertTrue(check_browser_version('MSIE', '5.0'));
-        $this->assertFalse(check_browser_version('MSIE', '7.0'));
-
-        $_SERVER['HTTP_USER_AGENT'] = $this->user_agents['MSIE']['9.0']['Windows 7'];
-        $this->assertTrue(check_browser_version('MSIE'));
-        $this->assertTrue(check_browser_version('MSIE', 0));
-        $this->assertTrue(check_browser_version('MSIE', '5.0'));
-        $this->assertTrue(check_browser_version('MSIE', '9.0'));
-        $this->assertFalse(check_browser_version('MSIE', '10'));
-
-        $_SERVER['HTTP_USER_AGENT'] = $this->user_agents['MSIE']['9.0i']['Windows 7'];
-        $this->assertTrue(check_browser_version('MSIE'));
-        $this->assertTrue(check_browser_version('MSIE', 0));
-        $this->assertTrue(check_browser_version('MSIE', '5.0'));
-        $this->assertTrue(check_browser_version('MSIE', '9.0'));
-        $this->assertFalse(check_browser_version('MSIE', '10'));
-
-        $_SERVER['HTTP_USER_AGENT'] = $this->user_agents['MSIE']['10.0']['Windows 8'];
-        $this->assertTrue(check_browser_version('MSIE'));
-        $this->assertTrue(check_browser_version('MSIE', 0));
-        $this->assertTrue(check_browser_version('MSIE', '5.0'));
-        $this->assertTrue(check_browser_version('MSIE', '9.0'));
-        $this->assertTrue(check_browser_version('MSIE', '10'));
-        $this->assertFalse(check_browser_version('MSIE', '11'));
-
-        $_SERVER['HTTP_USER_AGENT'] = $this->user_agents['MSIE']['10.0i']['Windows 8'];
-        $this->assertTrue(check_browser_version('MSIE'));
-        $this->assertTrue(check_browser_version('MSIE', 0));
-        $this->assertTrue(check_browser_version('MSIE', '5.0'));
-        $this->assertTrue(check_browser_version('MSIE', '9.0'));
-        $this->assertTrue(check_browser_version('MSIE', '10'));
-        $this->assertFalse(check_browser_version('MSIE', '11'));
-
-        $_SERVER['HTTP_USER_AGENT'] = $this->user_agents['Firefox']['2.0']['Windows XP'];
-        $this->assertTrue(check_browser_version('Firefox'));
-        $this->assertTrue(check_browser_version('Firefox', '1.5'));
-        $this->assertFalse(check_browser_version('Firefox', '3.0'));
-        $this->assertTrue(check_browser_version('Gecko', '2'));
-        $this->assertTrue(check_browser_version('Gecko', 20030516));
-        $this->assertTrue(check_browser_version('Gecko', 20051106));
-        $this->assertTrue(check_browser_version('Gecko', 2006010100));
-
-        $_SERVER['HTTP_USER_AGENT'] = $this->user_agents['Firefox']['1.0.6']['Windows XP'];
-        $this->assertTrue(check_browser_version('Firefox'));
-        $this->assertTrue(check_browser_version('Gecko', '1'));
-        $this->assertFalse(check_browser_version('Gecko', 20030516));
-        $this->assertFalse(check_browser_version('Gecko', 20051106));
-        $this->assertFalse(check_browser_version('Gecko', 2006010100));
-        $this->assertFalse(check_browser_version('Firefox', '1.5'));
-        $this->assertFalse(check_browser_version('Firefox', '3.0'));
-        $this->assertFalse(check_browser_version('Gecko', '2'));
-
-        $_SERVER['HTTP_USER_AGENT'] = $this->user_agents['Firefox']['2.0']['Windows XP'];
-        $this->assertTrue(check_browser_version('Firefox'));
-        $this->assertTrue(check_browser_version('Firefox', '1.5'));
-        $this->assertTrue(check_browser_version('Gecko', '1'));
-        $this->assertTrue(check_browser_version('Gecko', '2'));
-        $this->assertTrue(check_browser_version('Gecko', 20030516));
-        $this->assertTrue(check_browser_version('Gecko', 20051106));
-        $this->assertTrue(check_browser_version('Gecko', 2006010100));
-        $this->assertFalse(check_browser_version('Firefox', '3.0'));
-
-        $_SERVER['HTTP_USER_AGENT'] = $this->user_agents['Firefox']['3.6']['Linux'];
-        $this->assertTrue(check_browser_version('Firefox'));
-        $this->assertTrue(check_browser_version('Firefox', '1.5'));
-        $this->assertTrue(check_browser_version('Firefox', '3.0'));
-        $this->assertTrue(check_browser_version('Gecko', '2'));
-        $this->assertTrue(check_browser_version('Gecko', '3.6'));
-        $this->assertTrue(check_browser_version('Gecko', 20030516));
-        $this->assertTrue(check_browser_version('Gecko', 20051106));
-        $this->assertTrue(check_browser_version('Gecko', 2006010100));
-        $this->assertFalse(check_browser_version('Firefox', '4'));
-        $this->assertFalse(check_browser_version('Firefox', '10'));
-
-        $_SERVER['HTTP_USER_AGENT'] = $this->user_agents['Firefox']['3.6']['Linux'];
-        $this->assertTrue(check_browser_version('Firefox'));
-        $this->assertTrue(check_browser_version('Firefox', '1.5'));
-        $this->assertTrue(check_browser_version('Firefox', '3.0'));
-        $this->assertTrue(check_browser_version('Gecko', '2'));
-        $this->assertTrue(check_browser_version('Gecko', '3.6'));
-        $this->assertTrue(check_browser_version('Gecko', 20030516));
-        $this->assertTrue(check_browser_version('Gecko', 20051106));
-        $this->assertTrue(check_browser_version('Gecko', 2006010100));
-        $this->assertFalse(check_browser_version('Firefox', '4'));
-        $this->assertFalse(check_browser_version('Firefox', '10'));
-        $this->assertFalse(check_browser_version('Firefox', '18'));
-        $this->assertFalse(check_browser_version('Gecko', '4'));
-
-        $_SERVER['HTTP_USER_AGENT'] = $this->user_agents['Firefox']['15.0a2']['Windows'];
-        $this->assertTrue(check_browser_version('Firefox'));
-        $this->assertTrue(check_browser_version('Firefox', '1.5'));
-        $this->assertTrue(check_browser_version('Firefox', '3.0'));
-        $this->assertTrue(check_browser_version('Gecko', '2'));
-        $this->assertTrue(check_browser_version('Gecko', '3.6'));
-        $this->assertTrue(check_browser_version('Gecko', '15.0'));
-        $this->assertTrue(check_browser_version('Gecko', 20030516));
-        $this->assertTrue(check_browser_version('Gecko', 20051106));
-        $this->assertTrue(check_browser_version('Gecko', 2006010100));
-        $this->assertTrue(check_browser_version('Firefox', '4'));
-        $this->assertTrue(check_browser_version('Firefox', '10'));
-        $this->assertTrue(check_browser_version('Firefox', '15'));
-        $this->assertFalse(check_browser_version('Firefox', '18'));
-        $this->assertFalse(check_browser_version('Gecko', '18'));
-
-        $_SERVER['HTTP_USER_AGENT'] = $this->user_agents['Firefox']['18.0']['Mac OS X'];
-        $this->assertTrue(check_browser_version('Firefox'));
-        $this->assertTrue(check_browser_version('Firefox', '1.5'));
-        $this->assertTrue(check_browser_version('Firefox', '3.0'));
-        $this->assertTrue(check_browser_version('Gecko', '2'));
-        $this->assertTrue(check_browser_version('Gecko', '3.6'));
-        $this->assertTrue(check_browser_version('Gecko', '15.0'));
-        $this->assertTrue(check_browser_version('Gecko', '18.0'));
-        $this->assertTrue(check_browser_version('Gecko', 20030516));
-        $this->assertTrue(check_browser_version('Gecko', 20051106));
-        $this->assertTrue(check_browser_version('Gecko', 2006010100));
-        $this->assertTrue(check_browser_version('Firefox', '4'));
-        $this->assertTrue(check_browser_version('Firefox', '10'));
-        $this->assertTrue(check_browser_version('Firefox', '15'));
-        $this->assertTrue(check_browser_version('Firefox', '18'));
-        $this->assertFalse(check_browser_version('Firefox', '19'));
-        $this->assertFalse(check_browser_version('Gecko', '19'));
-
-        $_SERVER['HTTP_USER_AGENT'] = $this->user_agents['SeaMonkey']['2.0']['Windows'];
-
-        $this->assertTrue(check_browser_version('Gecko', '2'));
-        $this->assertTrue(check_browser_version('Gecko', 20030516));
-        $this->assertTrue(check_browser_version('Gecko', 20051106));
-        $this->assertTrue(check_browser_version('Gecko', 2006010100));
-        $this->assertFalse(check_browser_version('Gecko', '3.6'));
-        $this->assertFalse(check_browser_version('Gecko', '4.0'));
-        $this->assertFalse(check_browser_version('Firefox'));
-
-        $_SERVER['HTTP_USER_AGENT'] = $this->user_agents['SeaMonkey']['2.1']['Linux'];
-        $this->assertTrue(check_browser_version('Gecko', '2'));
-        $this->assertTrue(check_browser_version('Gecko', '3.6'));
-        $this->assertTrue(check_browser_version('Gecko', '4.0'));
-        $this->assertTrue(check_browser_version('Gecko', 20030516));
-        $this->assertTrue(check_browser_version('Gecko', 20051106));
-        $this->assertTrue(check_browser_version('Gecko', 2006010100));
-        $this->assertTrue(check_browser_version('Firefox'));
-        $this->assertTrue(check_browser_version('Firefox', 4.0));
-        $this->assertFalse(check_browser_version('Firefox', 5));
-        $this->assertFalse(check_browser_version('Gecko', '18.0'));
-
-    }
-
-    public function test_get_browser_version_classes() {
-        $_SERVER['HTTP_USER_AGENT'] = $this->user_agents['Safari']['412']['Mac OS X'];
-        $this->assertEquals(array('safari'), get_browser_version_classes());
-
-        $_SERVER['HTTP_USER_AGENT'] = $this->user_agents['Chrome']['8']['Mac OS X'];
-        $this->assertEquals(array('safari'), get_browser_version_classes());
-
-        $_SERVER['HTTP_USER_AGENT'] = $this->user_agents['Safari iOS']['528']['iPhone'];
-        $this->assertEquals(array('safari', 'ios'), get_browser_version_classes());
-
-        $_SERVER['HTTP_USER_AGENT'] = $this->user_agents['WebKit Android']['530']['Nexus'];
-        $this->assertEquals(array('safari', 'android'), get_browser_version_classes());
-
-        $_SERVER['HTTP_USER_AGENT'] = $this->user_agents['Chrome']['8']['Mac OS X'];
-        $this->assertEquals(array('safari'), get_browser_version_classes());
-
-        $_SERVER['HTTP_USER_AGENT'] = $this->user_agents['Opera']['9.0']['Windows XP'];
-        $this->assertEquals(array('opera'), get_browser_version_classes());
-
-        $_SERVER['HTTP_USER_AGENT'] = $this->user_agents['MSIE']['6.0']['Windows XP SP2'];
-        $this->assertEquals(array('ie', 'ie6'), get_browser_version_classes());
-
-        $_SERVER['HTTP_USER_AGENT'] = $this->user_agents['MSIE']['7.0']['Windows XP SP2'];
-        $this->assertEquals(array('ie', 'ie7'), get_browser_version_classes());
-
-        $_SERVER['HTTP_USER_AGENT'] = $this->user_agents['MSIE']['8.0']['Windows Vista'];
-        $this->assertEquals(array('ie', 'ie8'), get_browser_version_classes());
-
-        $_SERVER['HTTP_USER_AGENT'] = $this->user_agents['MSIE']['9.0']['Windows 7'];
-        $this->assertEquals(array('ie', 'ie9'), get_browser_version_classes());
-
-        $_SERVER['HTTP_USER_AGENT'] = $this->user_agents['MSIE']['9.0i']['Windows 7'];
-        $this->assertEquals(array('ie', 'ie9'), get_browser_version_classes());
-
-        $_SERVER['HTTP_USER_AGENT'] = $this->user_agents['MSIE']['10.0']['Windows 8'];
-        $this->assertEquals(array('ie', 'ie10'), get_browser_version_classes());
-
-        $_SERVER['HTTP_USER_AGENT'] = $this->user_agents['MSIE']['10.0i']['Windows 8'];
-        $this->assertEquals(array('ie', 'ie10'), get_browser_version_classes());
-
-        $_SERVER['HTTP_USER_AGENT'] = $this->user_agents['Firefox']['2.0']['Windows XP'];
-        $this->assertEquals(array('gecko', 'gecko18'), get_browser_version_classes());
-
-        $_SERVER['HTTP_USER_AGENT'] = $this->user_agents['Firefox']['3.0.6']['SUSE'];
-        $this->assertEquals(array('gecko', 'gecko19'), get_browser_version_classes());
-    }
-
-    public function test_get_device_type() {
-        // IE8 (common pattern ~1.5% of IE7/8 users have embedded IE6 agent).
-        $_SERVER['HTTP_USER_AGENT'] = 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1; Trident/4.0; BT Openworld BB; Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1) ; Hotbar 10.2.197.0; .NET CLR 3.0.4506.2152; .NET CLR 3.5.30729; .NET CLR 2.0.50727)';
-        $this->assertEquals('default', get_device_type());
-        // Genuine IE6.
-        $_SERVER['HTTP_USER_AGENT'] = 'Mozilla/4.0 (compatible; MSIE 6.0; AOL 9.0; Windows NT 5.1; SV1; FunWebProducts; .NET CLR 1.0.3705; Media Center PC 2.8)';
-        $this->assertEquals('legacy', get_device_type());
-    }
-
     public function test_fix_utf8() {
         // Make sure valid data including other types is not changed.
         $this->assertSame(null, fix_utf8(null));
@@ -471,8 +169,8 @@ class core_moodlelib_testcase extends advanced_testcase {
         $object->b = 'bb';
         $this->assertEquals($object, fix_utf8($object));
 
-        // Valid utf8 string.
-        $this->assertSame("žlutý koníček přeskočil potůček \n\t\r\0", fix_utf8("žlutý koníček přeskočil potůček \n\t\r\0"));
+        // valid utf8 string
+        $this->assertSame("žlutý koníček přeskočil potůček \n\t\r", fix_utf8("žlutý koníček přeskočil potůček \n\t\r\0"));
 
         // Invalid utf8 string.
         $this->assertSame('aš', fix_utf8('a'.chr(130).'š'), 'This fails with buggy iconv() when mbstring extenstion is not available as fallback.');
@@ -784,12 +482,15 @@ class core_moodlelib_testcase extends advanced_testcase {
         $this->assertSame('forum', clean_param('forum', PARAM_COMPONENT));
         $this->assertSame('user', clean_param('user', PARAM_COMPONENT));
         $this->assertSame('rating', clean_param('rating', PARAM_COMPONENT));
+        $this->assertSame('feedback360', clean_param('feedback360', PARAM_COMPONENT));
+        $this->assertSame('mod_feedback360', clean_param('mod_feedback360', PARAM_COMPONENT));
         $this->assertSame('', clean_param('mod_2something', PARAM_COMPONENT));
         $this->assertSame('', clean_param('2mod_something', PARAM_COMPONENT));
         $this->assertSame('', clean_param('mod_something_xx', PARAM_COMPONENT));
         $this->assertSame('', clean_param('auth_something__xx', PARAM_COMPONENT));
         $this->assertSame('', clean_param('mod_Something', PARAM_COMPONENT));
         $this->assertSame('', clean_param('mod_somethíng', PARAM_COMPONENT));
+        $this->assertSame('', clean_param('mod__something', PARAM_COMPONENT));
         $this->assertSame('', clean_param('auth_xx-yy', PARAM_COMPONENT));
         $this->assertSame('', clean_param('_auth_xx', PARAM_COMPONENT));
         $this->assertSame('', clean_param('a2uth_xx', PARAM_COMPONENT));
@@ -803,6 +504,7 @@ class core_moodlelib_testcase extends advanced_testcase {
     public function test_is_valid_plugin_name() {
         $this->assertTrue(is_valid_plugin_name('forum'));
         $this->assertTrue(is_valid_plugin_name('forum2'));
+        $this->assertTrue(is_valid_plugin_name('feedback360'));
         $this->assertTrue(is_valid_plugin_name('online_users'));
         $this->assertTrue(is_valid_plugin_name('blond_online_users'));
         $this->assertFalse(is_valid_plugin_name('online__users'));
@@ -819,6 +521,7 @@ class core_moodlelib_testcase extends advanced_testcase {
         // Please note the cleaning of plugin names is very strict, no guessing here.
         $this->assertSame('forum', clean_param('forum', PARAM_PLUGIN));
         $this->assertSame('forum2', clean_param('forum2', PARAM_PLUGIN));
+        $this->assertSame('feedback360', clean_param('feedback360', PARAM_PLUGIN));
         $this->assertSame('online_users', clean_param('online_users', PARAM_PLUGIN));
         $this->assertSame('blond_online_users', clean_param('blond_online_users', PARAM_PLUGIN));
         $this->assertSame('', clean_param('online__users', PARAM_PLUGIN));
@@ -837,6 +540,7 @@ class core_moodlelib_testcase extends advanced_testcase {
         $this->assertSame('something2', clean_param('something2', PARAM_AREA));
         $this->assertSame('some_thing', clean_param('some_thing', PARAM_AREA));
         $this->assertSame('some_thing_xx', clean_param('some_thing_xx', PARAM_AREA));
+        $this->assertSame('feedback360', clean_param('feedback360', PARAM_AREA));
         $this->assertSame('', clean_param('_something', PARAM_AREA));
         $this->assertSame('', clean_param('something_', PARAM_AREA));
         $this->assertSame('', clean_param('2something', PARAM_AREA));
@@ -2153,7 +1857,14 @@ class core_moodlelib_testcase extends advanced_testcase {
         $user = $this->getDataGenerator()->create_user(array('idnumber'=>'abc'));
         $user2 = $this->getDataGenerator()->create_user(array('idnumber'=>'xyz'));
 
+        // Delete user and capture event.
+        $sink = $this->redirectEvents();
         $result = delete_user($user);
+        $events = $sink->get_events();
+        $sink->close();
+        $event = array_pop($events);
+
+        // Test user is deleted in DB.
         $this->assertTrue($result);
         $deluser = $DB->get_record('user', array('id'=>$user->id), '*', MUST_EXIST);
         $this->assertEquals(1, $deluser->deleted);
@@ -2164,8 +1875,23 @@ class core_moodlelib_testcase extends advanced_testcase {
 
         $this->assertEquals(1, $DB->count_records('user', array('deleted'=>1)));
 
-        // Try invalid params.
+        // Test Event.
+        $this->assertInstanceOf('\core\event\user_deleted', $event);
+        $this->assertSame($user->id, $event->objectid);
+        $this->assertSame('user_deleted', $event->get_legacy_eventname());
+        $this->assertEventLegacyData($user, $event);
+        $expectedlogdata = array(SITEID, 'user', 'delete', "view.php?id=$user->id", $user->firstname.' '.$user->lastname);
+        $this->assertEventLegacyLogData($expectedlogdata, $event);
+        $eventdata = $event->get_data();
+        $this->assertSame($eventdata['other']['username'], $user->username);
+        $this->assertSame($eventdata['other']['email'], $user->email);
+        $this->assertSame($eventdata['other']['idnumber'], $user->idnumber);
+        $this->assertSame($eventdata['other']['picture'], $user->picture);
+        $this->assertSame($eventdata['other']['mnethostid'], $user->mnethostid);
+        $this->assertEquals($user, $event->get_record_snapshot('user', $event->objectid));
+        $this->assertEventContextNotUsed($event);
 
+        // Try invalid params.
         $record = new stdClass();
         $record->grrr = 1;
         try {
@@ -2456,24 +2182,13 @@ class core_moodlelib_testcase extends advanced_testcase {
      * Test function validate_internal_user_password().
      */
     public function test_validate_internal_user_password() {
-        if (password_compat_not_supported()) {
-            // If bcrypt is not properly supported test legacy md5 hashes instead.
-            // Can't hardcode these as we don't know the site's password salt.
-            $validhashes = array(
-                'pw' => hash_internal_user_password('pw'),
-                'abc' => hash_internal_user_password('abc'),
-                'C0mP1eX_&}<?@*&%` |\"' => hash_internal_user_password('C0mP1eX_&}<?@*&%` |\"'),
-                'ĩńťėŕňăţĩōŋāĹ' => hash_internal_user_password('ĩńťėŕňăţĩōŋāĹ')
-            );
-        } else {
-            // Otherwise test bcrypt hashes.
-            $validhashes = array(
-                'pw' => '$2y$10$LOSDi5eaQJhutSRun.OVJ.ZSxQZabCMay7TO1KmzMkDMPvU40zGXK',
-                'abc' => '$2y$10$VWTOhVdsBbWwtdWNDRHSpewjd3aXBQlBQf5rBY/hVhw8hciarFhXa',
-                'C0mP1eX_&}<?@*&%` |\"' => '$2y$10$3PJf.q.9ywNJlsInPbqc8.IFeSsvXrGvQLKRFBIhVu1h1I3vpIry6',
-                'ĩńťėŕňăţĩōŋāĹ' => '$2y$10$3A2Y8WpfRAnP3czJiSv6N.6Xp0T8hW3QZz2hUCYhzyWr1kGP1yUve'
-            );
-        }
+        // Test bcrypt hashes.
+        $validhashes = array(
+            'pw' => '$2y$10$LOSDi5eaQJhutSRun.OVJ.ZSxQZabCMay7TO1KmzMkDMPvU40zGXK',
+            'abc' => '$2y$10$VWTOhVdsBbWwtdWNDRHSpewjd3aXBQlBQf5rBY/hVhw8hciarFhXa',
+            'C0mP1eX_&}<?@*&%` |\"' => '$2y$10$3PJf.q.9ywNJlsInPbqc8.IFeSsvXrGvQLKRFBIhVu1h1I3vpIry6',
+            'ĩńťėŕňăţĩōŋāĹ' => '$2y$10$3A2Y8WpfRAnP3czJiSv6N.6Xp0T8hW3QZz2hUCYhzyWr1kGP1yUve'
+        );
 
         foreach ($validhashes as $password => $hash) {
             $user = new stdClass();
@@ -2502,17 +2217,12 @@ class core_moodlelib_testcase extends advanced_testcase {
             $user->password = $hash;
             $this->assertTrue(validate_internal_user_password($user, $password));
 
-            if (password_compat_not_supported()) {
-                // If bcrypt is not properly supported make sure the passwords are in md5 format.
-                $this->assertTrue(password_is_legacy_hash($hash));
-            } else {
-                // Otherwise they should not be in md5 format.
-                $this->assertFalse(password_is_legacy_hash($hash));
+            // They should not be in md5 format.
+            $this->assertFalse(password_is_legacy_hash($hash));
 
-                // Check that cost factor in hash is correctly set.
-                $this->assertRegExp('/\$10\$/', $hash);
-                $this->assertRegExp('/\$04\$/', $fasthash);
-            }
+            // Check that cost factor in hash is correctly set.
+            $this->assertRegExp('/\$10\$/', $hash);
+            $this->assertRegExp('/\$04\$/', $fasthash);
         }
     }
 
@@ -2540,15 +2250,8 @@ class core_moodlelib_testcase extends advanced_testcase {
         // Update the password.
         update_internal_user_password($user, 'password');
 
-        if (password_compat_not_supported()) {
-            // If bcrypt not properly supported the password should remain as an md5 hash.
-            $expected_hash = hash_internal_user_password('password', true);
-            $this->assertSame($user->password, $expected_hash);
-            $this->assertTrue(password_is_legacy_hash($user->password));
-        } else {
-            // Otherwise password should have been updated to a bcrypt hash.
-            $this->assertFalse(password_is_legacy_hash($user->password));
-        }
+        // Password should have been updated to a bcrypt hash.
+        $this->assertFalse(password_is_legacy_hash($user->password));
     }
 
     public function test_fullname() {
@@ -2663,6 +2366,16 @@ class core_moodlelib_testcase extends advanced_testcase {
             $this->assertSame($expectedname, $testname);
         }
 
+        // Test debugging message displays when
+        // fullnamedisplay setting is "normal".
+        $CFG->fullnamedisplay = 'firstname lastname';
+        unset($user);
+        $user = new stdClass();
+        $user->firstname = 'Stan';
+        $user->lastname = 'Lee';
+        $namedisplay = fullname($user);
+        $this->assertDebuggingCalled();
+
         // Tidy up after we finish testing.
         $CFG->fullnamedisplay = $originalcfg->fullnamedisplay;
     }
@@ -2671,12 +2384,12 @@ class core_moodlelib_testcase extends advanced_testcase {
         $this->resetAfterTest();
 
         // Additional names in an array.
-        $testarray = array('firstnamephonetic',
-                           'lastnamephonetic',
-                           'middlename',
-                           'alternatename',
-                           'firstname',
-                           'lastname');
+        $testarray = array('firstnamephonetic' => 'firstnamephonetic',
+                'lastnamephonetic' => 'lastnamephonetic',
+                'middlename' => 'middlename',
+                'alternatename' => 'alternatename',
+                'firstname' => 'firstname',
+                'lastname' => 'lastname');
         $this->assertEquals($testarray, get_all_user_name_fields());
 
         // Additional names as a string.
@@ -2686,6 +2399,19 @@ class core_moodlelib_testcase extends advanced_testcase {
         // Additional names as a string with an alias.
         $teststring = 't.firstnamephonetic,t.lastnamephonetic,t.middlename,t.alternatename,t.firstname,t.lastname';
         $this->assertEquals($teststring, get_all_user_name_fields(true, 't'));
+
+        // Additional name fields with a prefix - object.
+        $testarray = array('firstnamephonetic' => 'authorfirstnamephonetic',
+                'lastnamephonetic' => 'authorlastnamephonetic',
+                'middlename' => 'authormiddlename',
+                'alternatename' => 'authoralternatename',
+                'firstname' => 'authorfirstname',
+                'lastname' => 'authorlastname');
+        $this->assertEquals($testarray, get_all_user_name_fields(false, null, 'author'));
+
+        // Additional name fields with an alias and a title - string.
+        $teststring = 'u.firstnamephonetic AS authorfirstnamephonetic,u.lastnamephonetic AS authorlastnamephonetic,u.middlename AS authormiddlename,u.alternatename AS authoralternatename,u.firstname AS authorfirstname,u.lastname AS authorlastname';
+        $this->assertEquals($teststring, get_all_user_name_fields(true, 'u', null, 'author'));
     }
 
     public function test_order_in_string() {
@@ -2708,5 +2434,304 @@ class core_moodlelib_testcase extends advanced_testcase {
         $formatstring = 'start seconds away second firstquater first firsthalf';
         $expectedarray = array('19' => 'second', '38' => 'first', '44' => 'firsthalf');
         $this->assertEquals($expectedarray, order_in_string($valuearray, $formatstring));
+    }
+
+    public function test_complete_user_login() {
+        global $USER, $DB;
+
+        $this->resetAfterTest();
+        $user = $this->getDataGenerator()->create_user();
+        $this->setUser(0);
+
+        $sink = $this->redirectEvents();
+        $loginuser = clone($user);
+        $this->setCurrentTimeStart();
+        @complete_user_login($loginuser); // Hide session header errors.
+        $this->assertSame($loginuser, $USER);
+        $this->assertEquals($user->id, $USER->id);
+        $events = $sink->get_events();
+        $sink->close();
+
+        $this->assertCount(1, $events);
+        $event = reset($events);
+        $this->assertInstanceOf('\core\event\user_loggedin', $event);
+        $this->assertEquals('user', $event->objecttable);
+        $this->assertEquals($user->id, $event->objectid);
+        $this->assertEquals(context_system::instance()->id, $event->contextid);
+        $this->assertEventContextNotUsed($event);
+
+        $user = $DB->get_record('user', array('id'=>$user->id));
+
+        $this->assertTimeCurrent($user->firstaccess);
+        $this->assertTimeCurrent($user->lastaccess);
+
+        $this->assertTimeCurrent($USER->firstaccess);
+        $this->assertTimeCurrent($USER->lastaccess);
+        $this->assertTimeCurrent($USER->currentlogin);
+        $this->assertSame(sesskey(), $USER->sesskey);
+        $this->assertTimeCurrent($USER->preference['_lastloaded']);
+        $this->assertObjectNotHasAttribute('password', $USER);
+        $this->assertObjectNotHasAttribute('description', $USER);
+    }
+
+    /**
+     * Test require_logout.
+     */
+    public function test_require_logout() {
+        $this->resetAfterTest();
+        $user = $this->getDataGenerator()->create_user();
+        $this->setUser($user);
+
+        $this->assertTrue(isloggedin());
+
+        // Logout user and capture event.
+        $sink = $this->redirectEvents();
+        require_logout();
+        $events = $sink->get_events();
+        $sink->close();
+        $event = array_pop($events);
+
+        // Check if user is logged out.
+        $this->assertFalse(isloggedin());
+
+        // Test Event.
+        $this->assertInstanceOf('\core\event\user_loggedout', $event);
+        $this->assertSame($user->id, $event->objectid);
+        $this->assertSame('user_logout', $event->get_legacy_eventname());
+        $this->assertEventLegacyData($user, $event);
+        $expectedlogdata = array(SITEID, 'user', 'logout', 'view.php?id='.$event->objectid.'&course='.SITEID, $event->objectid, 0,
+            $event->objectid);
+        $this->assertEventLegacyLogData($expectedlogdata, $event);
+        $this->assertEventContextNotUsed($event);
+    }
+
+    public function test_email_to_user() {
+        global $CFG;
+
+        $this->resetAfterTest();
+
+        $user1 = $this->getDataGenerator()->create_user();
+        $user2 = $this->getDataGenerator()->create_user();
+
+        $subject = 'subject';
+        $messagetext = 'message text';
+        $subject2 = 'subject 2';
+        $messagetext2 = 'message text 2';
+
+        $this->assertNotEmpty($CFG->noemailever);
+        email_to_user($user1, $user2, $subject, $messagetext);
+        $this->assertDebuggingCalled('Not sending email due to $CFG->noemailever config setting');
+
+        unset_config('noemailever');
+
+        email_to_user($user1, $user2, $subject, $messagetext);
+        $this->assertDebuggingCalled('Unit tests must not send real emails! Use $this->redirectEmails()');
+
+        $sink = $this->redirectEmails();
+        email_to_user($user1, $user2, $subject, $messagetext);
+        email_to_user($user2, $user1, $subject2, $messagetext2);
+        $this->assertSame(2, $sink->count());
+        $result = $sink->get_messages();
+        $this->assertCount(2, $result);
+        $sink->close();
+
+        $this->assertSame($subject, $result[0]->subject);
+        $this->assertSame($messagetext, trim($result[0]->body));
+        $this->assertSame($user1->email, $result[0]->to);
+        $this->assertSame($user2->email, $result[0]->from);
+
+        $this->assertSame($subject2, $result[1]->subject);
+        $this->assertSame($messagetext2, trim($result[1]->body));
+        $this->assertSame($user2->email, $result[1]->to);
+        $this->assertSame($user1->email, $result[1]->from);
+
+        email_to_user($user1, $user2, $subject, $messagetext);
+        $this->assertDebuggingCalled('Unit tests must not send real emails! Use $this->redirectEmails()');
+
+        // Test $CFG->emailonlyfromnoreplyaddress.
+        set_config('emailonlyfromnoreplyaddress', 1);
+        $this->assertNotEmpty($CFG->emailonlyfromnoreplyaddress);
+        $sink = $this->redirectEmails();
+        email_to_user($user1, $user2, $subject, $messagetext);
+        unset_config('emailonlyfromnoreplyaddress');
+        email_to_user($user1, $user2, $subject, $messagetext);
+        $result = $sink->get_messages();
+        $this->assertEquals($CFG->noreplyaddress, $result[0]->from);
+        $this->assertNotEquals($CFG->noreplyaddress, $result[1]->from);
+        $sink->close();
+    }
+
+    /**
+     * Test user_updated event trigger by various apis.
+     */
+    public function test_user_updated_event() {
+        global $DB, $CFG;
+
+        $this->resetAfterTest();
+
+        $user = $this->getDataGenerator()->create_user();
+
+        // Set config to allow email_to_user() to be called.
+        $CFG->noemailever = false;
+
+        // Update user password.
+        $sink = $this->redirectEvents();
+        $sink2 = $this->redirectEmails(); // Make sure we are redirecting emails.
+        setnew_password_and_mail($user);
+        update_internal_user_password($user, 'randompass');
+        $events = $sink->get_events();
+        $sink->close();
+        $sink2->close();
+
+        // Test updated value.
+        $dbuser = $DB->get_record('user', array('id' => $user->id));
+        $this->assertSame($user->firstname, $dbuser->firstname);
+        $this->assertNotSame('M00dLe@T', $dbuser->password);
+
+        // Test event.
+        foreach ($events as $event) {
+            $this->assertInstanceOf('\core\event\user_updated', $event);
+            $this->assertSame($user->id, $event->objectid);
+            $this->assertSame('user_updated', $event->get_legacy_eventname());
+            $this->assertEventLegacyData($user, $event);
+            $this->assertEquals(context_user::instance($user->id), $event->get_context());
+            $expectedlogdata = array(SITEID, 'user', 'update', 'view.php?id='.$user->id, '');
+            $this->assertEventLegacyLogData($expectedlogdata, $event);
+            $this->assertEventContextNotUsed($event);
+        }
+    }
+
+    /**
+     * Test remove_course_content deletes course contents
+     * TODO Add asserts to verify other data related to course is deleted as well.
+     */
+    public function test_remove_course_contents() {
+
+        $this->resetAfterTest();
+
+        $course = $this->getDataGenerator()->create_course();
+        $user = $this->getDataGenerator()->create_user();
+        $gen = $this->getDataGenerator()->get_plugin_generator('core_notes');
+        $note = $gen->create_instance(array('courseid' => $course->id, 'userid' => $user->id));
+
+        $this->assertNotEquals(false, note_load($note->id));
+        remove_course_contents($course->id, false);
+        $this->assertFalse(note_load($note->id));
+    }
+
+    /**
+     * Test function username_load_fields_from_object().
+     */
+    public function test_username_load_fields_from_object() {
+        $this->resetAfterTest();
+
+        // This object represents the information returned from an sql query.
+        $userinfo = new stdClass();
+        $userinfo->userid = 1;
+        $userinfo->username = 'loosebruce';
+        $userinfo->firstname = 'Bruce';
+        $userinfo->lastname = 'Campbell';
+        $userinfo->firstnamephonetic = 'ブルース';
+        $userinfo->lastnamephonetic = 'カンベッル';
+        $userinfo->middlename = '';
+        $userinfo->alternatename = '';
+        $userinfo->email = '';
+        $userinfo->picture = 23;
+        $userinfo->imagealt = 'Michael Jordan draining another basket.';
+        $userinfo->idnumber = 3982;
+
+        // Just user name fields.
+        $user = new stdClass();
+        $user = username_load_fields_from_object($user, $userinfo);
+        $expectedarray = new stdClass();
+        $expectedarray->firstname = 'Bruce';
+        $expectedarray->lastname = 'Campbell';
+        $expectedarray->firstnamephonetic = 'ブルース';
+        $expectedarray->lastnamephonetic = 'カンベッル';
+        $expectedarray->middlename = '';
+        $expectedarray->alternatename = '';
+        $this->assertEquals($user, $expectedarray);
+
+        // User information for showing a picture.
+        $user = new stdClass();
+        $additionalfields = explode(',', user_picture::fields());
+        $user = username_load_fields_from_object($user, $userinfo, null, $additionalfields);
+        $user->id = $userinfo->userid;
+        $expectedarray = new stdClass();
+        $expectedarray->id = 1;
+        $expectedarray->firstname = 'Bruce';
+        $expectedarray->lastname = 'Campbell';
+        $expectedarray->firstnamephonetic = 'ブルース';
+        $expectedarray->lastnamephonetic = 'カンベッル';
+        $expectedarray->middlename = '';
+        $expectedarray->alternatename = '';
+        $expectedarray->email = '';
+        $expectedarray->picture = 23;
+        $expectedarray->imagealt = 'Michael Jordan draining another basket.';
+        $this->assertEquals($user, $expectedarray);
+
+        // Alter the userinfo object to have a prefix.
+        $userinfo->authorfirstname = 'Bruce';
+        $userinfo->authorlastname = 'Campbell';
+        $userinfo->authorfirstnamephonetic = 'ブルース';
+        $userinfo->authorlastnamephonetic = 'カンベッル';
+        $userinfo->authormiddlename = '';
+        $userinfo->authorpicture = 23;
+        $userinfo->authorimagealt = 'Michael Jordan draining another basket.';
+        $userinfo->authoremail = 'test@testing.net';
+
+
+        // Return an object with user picture information.
+        $user = new stdClass();
+        $additionalfields = explode(',', user_picture::fields());
+        $user = username_load_fields_from_object($user, $userinfo, 'author', $additionalfields);
+        $user->id = $userinfo->userid;
+        $expectedarray = new stdClass();
+        $expectedarray->id = 1;
+        $expectedarray->firstname = 'Bruce';
+        $expectedarray->lastname = 'Campbell';
+        $expectedarray->firstnamephonetic = 'ブルース';
+        $expectedarray->lastnamephonetic = 'カンベッル';
+        $expectedarray->middlename = '';
+        $expectedarray->alternatename = '';
+        $expectedarray->email = 'test@testing.net';
+        $expectedarray->picture = 23;
+        $expectedarray->imagealt = 'Michael Jordan draining another basket.';
+        $this->assertEquals($user, $expectedarray);
+    }
+
+    /**
+     * Test function count_words().
+     */
+    public function test_count_words() {
+        $count = count_words("one two three'four");
+        $this->assertEquals(3, $count);
+
+        $count = count_words('one+two three’four');
+        $this->assertEquals(3, $count);
+
+        $count = count_words('one"two three-four');
+        $this->assertEquals(3, $count);
+
+        $count = count_words('one@two three_four');
+        $this->assertEquals(4, $count);
+
+        $count = count_words('one\two three/four');
+        $this->assertEquals(4, $count);
+
+        $count = count_words(' one ... two &nbsp; three...four ');
+        $this->assertEquals(4, $count);
+
+        $count = count_words('one.2 3,four');
+        $this->assertEquals(4, $count);
+
+        $count = count_words('1³ £2 €3.45 $6,789');
+        $this->assertEquals(4, $count);
+
+        $count = count_words('one—two ブルース カンベッル');
+        $this->assertEquals(4, $count);
+
+        $count = count_words('one…two ブルース … カンベッル');
+        $this->assertEquals(4, $count);
     }
 }

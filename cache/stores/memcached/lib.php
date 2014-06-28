@@ -141,6 +141,7 @@ class cachestore_memcached extends cache_store implements cache_is_configurable 
             }
             $this->connection->addServers($this->servers);
         }
+        // Test the connection to the pool of servers.
         $this->isready = @$this->connection->set("ping", 'ping', 1);
     }
 
@@ -223,7 +224,7 @@ class cachestore_memcached extends cache_store implements cache_is_configurable 
      * @return int
      */
     public static function get_supported_modes(array $configuration = array()) {
-        return self::MODE_APPLICATION + self::MODE_SESSION;
+        return self::MODE_APPLICATION;
     }
 
     /**
@@ -373,7 +374,12 @@ class cachestore_memcached extends cache_store implements cache_is_configurable 
         $lines = explode("\n", $data->servers);
         $servers = array();
         foreach ($lines as $line) {
-            $line = trim($line, ':');
+            // Trim surrounding colons and default whitespace.
+            $line = trim(trim($line), ":");
+            // Skip blank lines.
+            if ($line === '') {
+                continue;
+            }
             $servers[] = explode(':', $line, 3);
         }
         return array(
@@ -474,6 +480,28 @@ class cachestore_memcached extends cache_store implements cache_is_configurable 
         if (!empty($config->testbufferwrites)) {
             $configuration['bufferwrites'] = $config->testbufferwrites;
         }
+
+        $store = new cachestore_memcached('Test memcached', $configuration);
+        $store->initialise($definition);
+
+        return $store;
+    }
+
+    /**
+     * Creates a test instance for unit tests if possible.
+     * @param cache_definition $definition
+     * @return bool|cachestore_memcached
+     */
+    public static function initialise_unit_test_instance(cache_definition $definition) {
+        if (!self::are_requirements_met()) {
+            return false;
+        }
+        if (!defined('TEST_CACHESTORE_MEMCACHED_TESTSERVERS')) {
+            return false;
+        }
+
+        $configuration = array();
+        $configuration['servers'] = explode("\n", TEST_CACHESTORE_MEMCACHED_TESTSERVERS);
 
         $store = new cachestore_memcached('Test memcached', $configuration);
         $store->initialise($definition);

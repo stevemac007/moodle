@@ -81,7 +81,7 @@ class filter_manager {
     public static function instance() {
         global $CFG;
         if (is_null(self::$singletoninstance)) {
-            if (!empty($CFG->perfdebug)) {
+            if (!empty($CFG->perfdebug) and $CFG->perfdebug > 7) {
                 self::$singletoninstance = new performance_measuring_filter_manager();
             } else {
                 self::$singletoninstance = new self();
@@ -247,7 +247,7 @@ class filter_manager {
      *
      * @param moodle_page $page the page we are going to add requirements to.
      * @param context $context the context which contents are going to be filtered.
-     * @since 2.3
+     * @since Moodle 2.3
      */
     public function setup_page_for_filters($page, $context) {
         $filters = $this->get_text_filters($context);
@@ -409,7 +409,7 @@ abstract class moodle_text_filter {
      *
      * @param moodle_page $page the page we are going to add requirements to.
      * @param context $context the context which contents are going to be filtered.
-     * @since 2.3
+     * @since Moodle 2.3
      */
     public function setup($page, $context) {
         // Override me, if needed.
@@ -527,7 +527,7 @@ function filter_get_all_installed() {
  *
  * @param string $filtername The filter name, for example 'tex'.
  * @param int $state One of the values TEXTFILTER_ON, TEXTFILTER_OFF or TEXTFILTER_DISABLED.
- * @param int $move 1 means up, 0 means the same, -1 means down
+ * @param int $move -1 means up, 0 means the same, 1 means down
  */
 function filter_set_global_state($filtername, $state, $move = 0) {
     global $DB;
@@ -721,13 +721,23 @@ function filter_get_string_filters() {
  */
 function filter_set_applies_to_strings($filter, $applytostrings) {
     $stringfilters = filter_get_string_filters();
-    $numstringfilters = count($stringfilters);
+    $prevfilters = $stringfilters;
+    $allfilters = core_component::get_plugin_list('filter');
+
     if ($applytostrings) {
         $stringfilters[$filter] = $filter;
     } else {
         unset($stringfilters[$filter]);
     }
-    if (count($stringfilters) != $numstringfilters) {
+
+    // Remove missing filters.
+    foreach ($stringfilters as $filter) {
+        if (!isset($allfilters[$filter])) {
+            unset($stringfilters[$filter]);
+        }
+    }
+
+    if ($prevfilters != $stringfilters) {
         set_config('stringfilters', implode(',', $stringfilters));
         set_config('filterall', !empty($stringfilters));
     }
@@ -1124,6 +1134,10 @@ function filter_delete_all_for_context($contextid) {
  */
 function filter_has_global_settings($filter) {
     global $CFG;
+    $settingspath = $CFG->dirroot . '/filter/' . $filter . '/settings.php';
+    if (is_readable($settingspath)) {
+        return true;
+    }
     $settingspath = $CFG->dirroot . '/filter/' . $filter . '/filtersettings.php';
     return is_readable($settingspath);
 }

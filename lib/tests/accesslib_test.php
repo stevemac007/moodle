@@ -60,7 +60,7 @@ class core_accesslib_testcase extends advanced_testcase {
         $this->assertNotEmpty($ACCESSLIB_PRIVATE->rolepermissions);
         $this->assertNotEmpty($ACCESSLIB_PRIVATE->rolepermissions);
         $this->assertNotEmpty($ACCESSLIB_PRIVATE->accessdatabyuser);
-        accesslib_clear_all_caches(true);
+        accesslib_clear_all_caches_for_unit_testing();
         $this->assertEmpty($ACCESSLIB_PRIVATE->rolepermissions);
         $this->assertEmpty($ACCESSLIB_PRIVATE->rolepermissions);
         $this->assertEmpty($ACCESSLIB_PRIVATE->dirtycontexts);
@@ -385,7 +385,7 @@ class core_accesslib_testcase extends advanced_testcase {
         $permission = $DB->get_record('role_capabilities', array('contextid'=>$frontcontext->id, 'roleid'=>$student->id, 'capability'=>'moodle/backup:backupcourse'));
         $this->assertNotEmpty($permission);
         $this->assertEquals(CAP_ALLOW, $permission->permission);
-        $this->assertEquals(3, $permission->modifierid);
+        $this->assertEquals($user->id, $permission->modifierid);
 
         $result = assign_capability('moodle/backup:backupcourse', CAP_PROHIBIT, $student->id, $frontcontext->id, true);
         $this->assertTrue($result);
@@ -416,9 +416,10 @@ class core_accesslib_testcase extends advanced_testcase {
         $event = array_pop($events);
 
         $this->assertInstanceOf('\core\event\role_capabilities_updated', $event);
-        $expectedurl = new moodle_url('admin/roles/define.php', array('action' => 'view', 'roleid' => $student->id));
+        $expectedurl = new moodle_url('/admin/roles/define.php', array('action' => 'view', 'roleid' => $student->id));
         $this->assertEquals($expectedurl, $event->get_url());
         $this->assertEventLegacyLogData($expectedlegacylog, $event);
+        $this->assertEventContextNotUsed($event);
     }
 
     /**
@@ -507,6 +508,7 @@ class core_accesslib_testcase extends advanced_testcase {
         $this->assertEquals($raid, $event->other['id']);
         $this->assertSame('', $event->other['component']);
         $this->assertEquals(0, $event->other['itemid']);
+        $this->assertInstanceOf('moodle_url', $event->get_url());
         $this->assertSame('role_assigned', $event::get_legacy_eventname());
         $roles = get_all_roles();
         $rolenames = role_fix_names($roles, $context, ROLENAME_ORIGINAL, true);
@@ -556,6 +558,7 @@ class core_accesslib_testcase extends advanced_testcase {
         $this->assertCount(3, $event->other);
         $this->assertSame('', $event->other['component']);
         $this->assertEquals(0, $event->other['itemid']);
+        $this->assertInstanceOf('moodle_url', $event->get_url());
         $roles = get_all_roles();
         $rolenames = role_fix_names($roles, $context, ROLENAME_ORIGINAL, true);
         $expectedlegacylog = array($course->id, 'role', 'unassign',
@@ -699,7 +702,6 @@ class core_accesslib_testcase extends advanced_testcase {
         $this->assertSame('role', $event->objecttable);
         $this->assertSame($role->id, $event->objectid);
         $this->assertEquals(context_system::instance(), $event->get_context());
-        $this->assertSame($role->name, $event->other['name']);
         $this->assertSame($role->shortname, $event->other['shortname']);
         $this->assertSame($role->description, $event->other['description']);
         $this->assertSame($role->archetype, $event->other['archetype']);
@@ -1033,7 +1035,7 @@ class core_accesslib_testcase extends advanced_testcase {
         $teacherrole = $DB->get_record('role', array('shortname'=>'editingteacher'), '*', MUST_EXIST);
         $teacher = $this->getDataGenerator()->create_user();
         role_assign($teacherrole->id, $teacher->id, $coursecontext);
-        $teacherename = (object)array('roleid'=>$teacher->id, 'name'=>'Učitel', 'contextid'=>$coursecontext->id);
+        $teacherename = (object)array('roleid'=>$teacherrole->id, 'name'=>'Učitel', 'contextid'=>$coursecontext->id);
         $DB->insert_record('role_names', $teacherename);
 
         $studentrole = $DB->get_record('role', array('shortname'=>'student'), '*', MUST_EXIST);
@@ -1140,7 +1142,7 @@ class core_accesslib_testcase extends advanced_testcase {
         $teacherrole = $DB->get_record('role', array('shortname'=>'editingteacher'), '*', MUST_EXIST);
         $teacher = $this->getDataGenerator()->create_user();
         role_assign($teacherrole->id, $teacher->id, $coursecontext);
-        $teacherename = (object)array('roleid'=>$teacher->id, 'name'=>'Učitel', 'contextid'=>$coursecontext->id);
+        $teacherename = (object)array('roleid'=>$teacherrole->id, 'name'=>'Učitel', 'contextid'=>$coursecontext->id);
         $DB->insert_record('role_names', $teacherename);
 
         $contexts = $DB->get_records('context');
@@ -1198,10 +1200,10 @@ class core_accesslib_testcase extends advanced_testcase {
         $teacherrole = $DB->get_record('role', array('shortname'=>'editingteacher'), '*', MUST_EXIST);
         $teacher = $this->getDataGenerator()->create_user();
         role_assign($teacherrole->id, $teacher->id, $coursecontext);
-        $teacherename = (object)array('roleid'=>$teacher->id, 'name'=>'Učitel', 'contextid'=>$coursecontext->id);
+        $teacherename = (object)array('roleid'=>$teacherrole->id, 'name'=>'Učitel', 'contextid'=>$coursecontext->id);
         $DB->insert_record('role_names', $teacherename);
         $this->assertTrue($DB->record_exists('capabilities', array('name'=>'moodle/backup:backupcourse'))); // Any capability is ok.
-        assign_capability('moodle/backup:backupcourse', CAP_PROHIBIT, $teacher->id, $coursecontext->id);
+        assign_capability('moodle/backup:backupcourse', CAP_PROHIBIT, $teacherrole->id, $coursecontext->id);
 
         $studentrole = $DB->get_record('role', array('shortname'=>'student'), '*', MUST_EXIST);
         $student = $this->getDataGenerator()->create_user();
@@ -1794,7 +1796,7 @@ class core_accesslib_testcase extends advanced_testcase {
 
         // Add a resource to frontpage.
         $page = $generator->create_module('page', array('course'=>$SITE->id));
-        $testpages[] = $page->id;
+        $testpages[] = $page->cmid;
         $frontpagepagecontext = context_module::instance($page->cmid);
 
         // Add block to frontpage resource.
@@ -1837,7 +1839,7 @@ class core_accesslib_testcase extends advanced_testcase {
 
                 // Add a resource to each course.
                 $page = $generator->create_module('page', array('course'=>$course->id));
-                $testpages[] = $page->id;
+                $testpages[] = $page->cmid;
                 $modcontext = context_module::instance($page->cmid);
 
                 // Add block to each module.
@@ -2094,7 +2096,7 @@ class core_accesslib_testcase extends advanced_testcase {
         unassign_capability('moodle/site:accessallgroups', $allroles['teacher'], $frontpagecontext->id, true);
         unset($rc);
 
-        accesslib_clear_all_caches(false); // Must be done after assign_capability().
+        accesslib_clear_all_caches_for_unit_testing(); // Must be done after assign_capability().
 
 
         // Test role_assign(), role_unassign(), role_unassign_all() functions.
@@ -2111,7 +2113,7 @@ class core_accesslib_testcase extends advanced_testcase {
         $this->assertEquals(0, $DB->count_records('role_assignments', array('contextid'=>$context->id)));
         unset($context);
 
-        accesslib_clear_all_caches(false); // Just in case.
+        accesslib_clear_all_caches_for_unit_testing(); // Just in case.
 
 
         // Test has_capability(), get_users_by_capability(), role_switch(), reload_all_capabilities() and friends functions.
@@ -2172,7 +2174,7 @@ class core_accesslib_testcase extends advanced_testcase {
 
         assign_capability('mod/page:view', CAP_PREVENT, $allroles['guest'], $systemcontext, true);
 
-        accesslib_clear_all_caches(false); // Must be done after assign_capability().
+        accesslib_clear_all_caches_for_unit_testing(); /// Must be done after assign_capability().
 
         // Extra tests for guests and not-logged-in users because they can not be verified by cross checking
         // with get_users_by_capability() where they are ignored.
@@ -2273,8 +2275,6 @@ class core_accesslib_testcase extends advanced_testcase {
             $userids = array_slice($userids, 0, 5);
         }
 
-        // Random time!
-        // srand(666);
         foreach ($userids as $userid) { // No guest or deleted.
             // Each user gets 0-10 random roles.
             $rcount = rand(0, 10);
@@ -2297,7 +2297,7 @@ class core_accesslib_testcase extends advanced_testcase {
         unset($permissions);
         unset($roles);
 
-        accesslib_clear_all_caches(false); // Must be done after assign_capability().
+        accesslib_clear_all_caches_for_unit_testing(); // must be done after assign_capability().
 
         // Test time - let's set up some real user, just in case the logic for USER affects the others...
         $USER = $DB->get_record('user', array('id'=>$testusers[3]));
@@ -2700,8 +2700,8 @@ class core_accesslib_testcase extends advanced_testcase {
         $this->assertEquals($url1, $url2);
         $this->assertInstanceOf('moodle_url', $url2);
 
-        $pagecm = get_coursemodule_from_instance('page', $testpages[7]);
-        $context = context_module::instance($pagecm->id);
+        $pagecm = get_coursemodule_from_id('page', $testpages[7]);
+        $context = context_module::instance($testpages[7]);
         $coursecontext1 = get_course_context($context);
         $this->assertDebuggingCalled('get_course_context() is deprecated, please use $context->get_course_context(true) instead.', DEBUG_DEVELOPER);
         $coursecontext2 = $context->get_course_context(true);
@@ -2799,6 +2799,41 @@ class core_accesslib_testcase extends advanced_testcase {
             $perms2 = array_values($DB->get_records('role_capabilities', array('capability'=>'mod/page:addinstance', 'roleid'=>$role->id), 'contextid, permission', 'contextid, permission'));
         }
         $this->assertEquals($perms1, $perms2);
+    }
+
+    /**
+     * Tests reset_role_capabilities function.
+     */
+    public function test_reset_role_capabilities() {
+        global $DB;
+        $this->resetAfterTest(true);
+        $generator = $this->getDataGenerator();
+
+        // Create test course and user, enrol one in the other.
+        $course = $generator->create_course();
+        $user = $generator->create_user();
+        $roleid = $DB->get_field('role', 'id', array('shortname' => 'student'), MUST_EXIST);
+        $generator->enrol_user($user->id, $course->id, $roleid);
+
+        // Change student role so it DOES have 'mod/forum:addinstance'.
+        $systemcontext = context_system::instance();
+        assign_capability('mod/forum:addinstance', CAP_ALLOW, $roleid, $systemcontext->id);
+
+        // Override course so it does NOT allow students 'mod/forum:viewdiscussion'.
+        $coursecontext = context_course::instance($course->id);
+        assign_capability('mod/forum:viewdiscussion', CAP_PREVENT, $roleid, $coursecontext->id);
+
+        // Check expected capabilities so far.
+        $this->assertTrue(has_capability('mod/forum:addinstance', $coursecontext, $user));
+        $this->assertFalse(has_capability('mod/forum:viewdiscussion', $coursecontext, $user));
+
+        // Oops, allowing student to add forums was a mistake, let's reset the role.
+        reset_role_capabilities($roleid);
+
+        // Check new expected capabilities - role capabilities should have been reset,
+        // while the override at course level should remain.
+        $this->assertFalse(has_capability('mod/forum:addinstance', $coursecontext, $user));
+        $this->assertFalse(has_capability('mod/forum:viewdiscussion', $coursecontext, $user));
     }
 }
 

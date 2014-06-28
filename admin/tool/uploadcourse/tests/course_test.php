@@ -635,8 +635,22 @@ class tool_uploadcourse_course_testcase extends advanced_testcase {
         }
         $this->assertTrue($found);
 
-        // Restore the time limit to prevent warning.
-        set_time_limit(0);
+        // Restoring twice from the same course should work.
+        $data = array('shortname' => 'B1', 'templatecourse' => $c1->shortname, 'summary' => 'B', 'category' => 1,
+            'fullname' => 'B1');
+        $co = new tool_uploadcourse_course($mode, $updatemode, $data);
+        $this->assertTrue($co->prepare());
+        $co->proceed();
+        $course = $DB->get_record('course', array('shortname' => 'B1'));
+        $modinfo = get_fast_modinfo($course);
+        $found = false;
+        foreach ($modinfo->get_cms() as $cmid => $cm) {
+            if ($cm->modname == 'forum' && $cm->name == $c1f1->name) {
+                $found = true;
+                break;
+            }
+        }
+        $this->assertTrue($found);
     }
 
     public function test_restore_file() {
@@ -668,8 +682,64 @@ class tool_uploadcourse_course_testcase extends advanced_testcase {
         }
         $this->assertTrue($found);
 
-        // Restore the time limit to prevent warning.
-        set_time_limit(0);
+        // Restoring twice from the same file should work.
+        $data = array('shortname' => 'B1', 'backupfile' => __DIR__ . '/fixtures/backup.mbz',
+            'summary' => 'B', 'category' => 1, 'fullname' => 'B1');
+        $co = new tool_uploadcourse_course($mode, $updatemode, $data);
+        $this->assertTrue($co->prepare());
+        $co->proceed();
+        $course = $DB->get_record('course', array('shortname' => 'B1'));
+        $modinfo = get_fast_modinfo($course);
+        $found = false;
+        foreach ($modinfo->get_cms() as $cmid => $cm) {
+            if ($cm->modname == 'glossary' && $cm->name == 'Imported Glossary') {
+                $found = true;
+            } else if ($cm->modname == 'forum' && $cm->name == $c1f1->name) {
+                // We should not find this!
+                $this->assertTrue(false);
+            }
+        }
+        $this->assertTrue($found);
+    }
+
+    public function test_restore_invalid_file() {
+        $this->resetAfterTest();
+
+        // Restore from a non-existing file should not be allowed.
+        $mode = tool_uploadcourse_processor::MODE_CREATE_NEW;
+        $updatemode = tool_uploadcourse_processor::UPDATE_ALL_WITH_DATA_ONLY;
+        $data = array('shortname' => 'A1', 'backupfile' => '/lead/no/where',
+            'category' => 1, 'fullname' => 'A1');
+        $co = new tool_uploadcourse_course($mode, $updatemode, $data);
+        $this->assertFalse($co->prepare());
+        $this->assertArrayHasKey('cannotreadbackupfile', $co->get_errors());
+
+        // Restore from an invalid file should not be allowed.
+        $mode = tool_uploadcourse_processor::MODE_CREATE_NEW;
+        $updatemode = tool_uploadcourse_processor::UPDATE_ALL_WITH_DATA_ONLY;
+        $data = array('shortname' => 'A1', 'backupfile' => __FILE__,
+            'category' => 1, 'fullname' => 'A1');
+        $co = new tool_uploadcourse_course($mode, $updatemode, $data);
+
+        $this->assertFalse($co->prepare());
+        $this->assertArrayHasKey('invalidbackupfile', $co->get_errors());
+
+        // Zip packer throws a debugging message, this assertion is only here to prevent
+        // the message from being displayed.
+        $this->assertDebuggingCalled();
+    }
+
+    public function test_restore_invalid_course() {
+        $this->resetAfterTest();
+
+        // Restore from an invalid file should not be allowed.
+        $mode = tool_uploadcourse_processor::MODE_CREATE_NEW;
+        $updatemode = tool_uploadcourse_processor::UPDATE_ALL_WITH_DATA_ONLY;
+        $data = array('shortname' => 'A1', 'templatecourse' => 'iamnotavalidcourse',
+            'category' => 1, 'fullname' => 'A1');
+        $co = new tool_uploadcourse_course($mode, $updatemode, $data);
+        $this->assertFalse($co->prepare());
+        $this->assertArrayHasKey('coursetorestorefromdoesnotexist', $co->get_errors());
     }
 
     /**

@@ -75,9 +75,9 @@
         }
     }
 
-    if (isloggedin()) {
-        add_to_log(SITEID, 'course', 'view', 'view.php?id='.SITEID, SITEID);
-    }
+    $eventparams = array('context' => context_course::instance(SITEID));
+    $event = \core\event\course_viewed::create($eventparams);
+    $event->trigger();
 
 /// If the hub plugin is installed then we let it take over the homepage here
     if (file_exists($CFG->dirroot.'/local/hub/lib.php') and get_config('local_hub', 'hubenabled')) {
@@ -184,18 +184,18 @@
                     if (isloggedin()) {
                         $SESSION->fromdiscussion = $CFG->wwwroot;
                         $subtext = '';
-                        if (forum_is_subscribed($USER->id, $newsforum)) {
-                            if (!forum_is_forcesubscribed($newsforum)) {
+                        if (\mod_forum\subscriptions::is_subscribed($USER->id, $newsforum)) {
+                            if (!\mod_forum\subscriptions::is_forcesubscribed($newsforum)) {
                                 $subtext = get_string('unsubscribe', 'forum');
                             }
                         } else {
                             $subtext = get_string('subscribe', 'forum');
                         }
-                        echo $OUTPUT->heading($forumname, 2, 'headingblock header');
+                        echo $OUTPUT->heading($forumname);
                         $suburl = new moodle_url('/mod/forum/subscribe.php', array('id' => $newsforum->id, 'sesskey' => sesskey()));
                         echo html_writer::tag('div', html_writer::link($suburl, $subtext), array('class' => 'subscribelink'));
                     } else {
-                        echo $OUTPUT->heading($forumname, 2, 'headingblock header');
+                        echo $OUTPUT->heading($forumname);
                     }
 
                     forum_print_latest_discussions($SITE, $newsforum, $SITE->newsitems, 'plain', 'p.modified DESC');
@@ -215,7 +215,7 @@
                     //wrap frontpage course list in div container
                     echo html_writer::start_tag('div', array('id'=>'frontpage-course-list'));
 
-                    echo $OUTPUT->heading(get_string('mycourses'), 2, 'headingblock header');
+                    echo $OUTPUT->heading(get_string('mycourses'));
                     echo $mycourseshtml;
 
                     //end frontpage course list div container
@@ -234,7 +234,7 @@
                     //wrap frontpage course list in div container
                     echo html_writer::start_tag('div', array('id'=>'frontpage-course-list'));
 
-                    echo $OUTPUT->heading(get_string('availablecourses'), 2, 'headingblock header');
+                    echo $OUTPUT->heading(get_string('availablecourses'));
                     echo $availablecourseshtml;
 
                     //end frontpage course list div container
@@ -250,7 +250,7 @@
                 //wrap frontpage category names in div container
                 echo html_writer::start_tag('div', array('id'=>'frontpage-category-names'));
 
-                echo $OUTPUT->heading(get_string('categories'), 2, 'headingblock header');
+                echo $OUTPUT->heading(get_string('categories'));
                 echo $courserenderer->frontpage_categories_list();
 
                 //end frontpage category names div container
@@ -265,7 +265,7 @@
                 //wrap frontpage category combo in div container
                 echo html_writer::start_tag('div', array('id'=>'frontpage-category-combo'));
 
-                echo $OUTPUT->heading(get_string('courses'), 2, 'headingblock header');
+                echo $OUTPUT->heading(get_string('courses'));
                 echo $courserenderer->frontpage_combo_list();
 
                 //end frontpage category combo div container

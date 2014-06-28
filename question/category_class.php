@@ -134,25 +134,28 @@ class question_category_list_item extends list_item {
  */
 class question_category_object {
 
-    var $str;
     /**
-     * Nested lists to display categories.
-     *
-     * @var array
+     * @var array common language strings.
      */
-    var $editlists = array();
-    var $newtable;
-    var $tab;
-    var $tabsize = 3;
+    public $str;
+
+    /**
+     * @var array nested lists to display categories.
+     */
+    public $editlists = array();
+    public $newtable;
+    public $tab;
+    public $tabsize = 3;
 
     /**
      * @var moodle_url Object representing url for this page
      */
-    var $pageurl;
+    public $pageurl;
+
     /**
      * @var question_category_edit_form Object representing form for adding / editing categories.
      */
-    var $catform;
+    public $catform;
 
     /**
      * Constructor
@@ -377,7 +380,7 @@ class question_category_object {
     /**
      * Creates a new category with given params
      */
-    public function add_category($newparent, $newcategory, $newinfo, $return = false) {
+    public function add_category($newparent, $newcategory, $newinfo, $return = false, $newinfoformat = FORMAT_HTML) {
         global $DB;
         if (empty($newcategory)) {
             print_error('categorynamecantbeblank', 'question');
@@ -397,9 +400,19 @@ class question_category_object {
         $cat->contextid = $contextid;
         $cat->name = $newcategory;
         $cat->info = $newinfo;
+        $cat->infoformat = $newinfoformat;
         $cat->sortorder = 999;
         $cat->stamp = make_unique_id_code();
         $categoryid = $DB->insert_record("question_categories", $cat);
+
+        // Log the creation of this category.
+        $params = array(
+            'objectid' => $categoryid,
+            'contextid' => $contextid
+        );
+        $event = \core\event\question_category_created::create($params);
+        $event->trigger();
+
         if ($return) {
             return $categoryid;
         } else {
@@ -410,7 +423,7 @@ class question_category_object {
     /**
      * Updates an existing category with given params
      */
-    public function update_category($updateid, $newparent, $newname, $newinfo) {
+    public function update_category($updateid, $newparent, $newname, $newinfo, $newinfoformat = FORMAT_HTML) {
         global $CFG, $DB;
         if (empty($newname)) {
             print_error('categorynamecantbeblank', 'question');
@@ -442,6 +455,7 @@ class question_category_object {
         $cat->id = $updateid;
         $cat->name = $newname;
         $cat->info = $newinfo;
+        $cat->infoformat = $newinfoformat;
         $cat->parent = $parentid;
         $cat->contextid = $tocontextid;
         $DB->update_record('question_categories', $cat);

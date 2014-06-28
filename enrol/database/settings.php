@@ -41,7 +41,7 @@ if ($ADMIN->fulltree) {
 
     $settings->add(new admin_setting_configpasswordunmask('enrol_database/dbpass', get_string('dbpass', 'enrol_database'), '', ''));
 
-    $settings->add(new admin_setting_configtext('enrol_database/dbname', get_string('dbname', 'enrol_database'), '', ''));
+    $settings->add(new admin_setting_configtext('enrol_database/dbname', get_string('dbname', 'enrol_database'), get_string('dbname_desc', 'enrol_database'), ''));
 
     $settings->add(new admin_setting_configtext('enrol_database/dbencoding', get_string('dbencoding', 'enrol_database'), '', 'utf-8'));
 
@@ -77,6 +77,10 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_configtext('enrol_database/remoteuserfield', get_string('remoteuserfield', 'enrol_database'), get_string('remoteuserfield_desc', 'enrol_database'), ''));
 
     $settings->add(new admin_setting_configtext('enrol_database/remoterolefield', get_string('remoterolefield', 'enrol_database'), get_string('remoterolefield_desc', 'enrol_database'), ''));
+
+    $otheruserfieldlabel = get_string('remoteotheruserfield', 'enrol_database');
+    $otheruserfielddesc  = get_string('remoteotheruserfield_desc', 'enrol_database');
+    $settings->add(new admin_setting_configtext('enrol_database/remoteotheruserfield', $otheruserfieldlabel, $otheruserfielddesc, ''));
 
     if (!during_initial_install()) {
         $options = get_default_enrol_roles(context_system::instance());
