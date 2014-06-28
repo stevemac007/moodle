@@ -9,6 +9,7 @@ before_script:
   - pear channel-discover pear.phpunit.de
   - pear channel-discover pear.symfony.com
   - pear install pear.phpunit.de/DbUnit
+  - php composer.phar install --dev
   - phpenv rehash
   - cp config-dist.php config.php
   - sh -c "sed -i -e s/'password'/''/ -e s/example.com/localhost/ -e s%/home/example%$HOME% -e 's%\(\$CFG.*phpu\)%\n\1%' config.php"
